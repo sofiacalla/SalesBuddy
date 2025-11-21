@@ -9,11 +9,14 @@ import Pipeline from "@/pages/Pipeline";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 
+import RepMyWeek from "@/pages/RepMyWeek";
+
 function Router() {
   return (
     <Layout>
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/my-week" component={RepMyWeek} />
         <Route path="/accounts" component={Accounts} />
         <Route path="/pipeline" component={Pipeline} />
         <Route path="/settings" component={Settings} />

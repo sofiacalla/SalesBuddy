@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, BarChart3, Settings, Bell, Search } from "lucide-react";
+import { LayoutDashboard, Users, BarChart3, Settings, Bell, Search, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@assets/generated_images/minimalist_geometric_logo_for_sales_buddy_crm.png";
 
@@ -8,6 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: "/", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/my-week", icon: CheckCircle2, label: "My Week" },
     { href: "/accounts", icon: Users, label: "Accounts" },
     { href: "/pipeline", icon: BarChart3, label: "Pipeline" },
     { href: "/settings", icon: Settings, label: "Settings" },

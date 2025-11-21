@@ -1,42 +1,117 @@
-import { Deal, Confidence } from "./mockData";
-import { differenceInDays, isAfter, parseISO } from "date-fns";
+import { Deal, Confidence, HistoricalRevenue } from "./mockData";
+import { differenceInDays, isAfter, parseISO, isSameMonth, subMonths, format } from "date-fns";
 
 /**
- * FORECAST RULES (Deterministic)
- * 
- * Conservative = sum(amount) of deals where:
- *  - confidence >= HIGH 
- *  - AND next_step_date within 14 days 
- *  - AND last_activity_date within stale_threshold (7 days).
- * 
- * Base = sum(amount) of deals where:
- *  - confidence in {HIGH, MEDIUM} 
- *  - AND next_step_date within 30 days.
- * 
- * Optimistic = Base + sum(amount) of deals where:
- *  - confidence = LOW 
- *  - OR (early-stage high-value deals flagged by priority rules - simplified to > $100k in Discovery).
+ * Constants used for forecast rules and health metrics.
  */
-
 const STALE_THRESHOLD_DAYS = 7;
 
-export function calculateForecast(deals: Deal[]) {
+/**
+ * Interface for the comprehensive dashboard metrics return value.
+ */
+export interface DashboardMetrics {
+  conservative: number;
+  base: number;
+  optimistic: number;
+  pipelineValue: number;
+  committedValue: number; // High confidence deals
+  uncommittedValue: number; // Low/Medium confidence deals
+  closedWon: number;
+  mape: number; // Forecast Reliability
+  hygieneScore: number; // % complete
+  freshnessScore: number; // % updated recently
+  winRate: number; // Won / (Won + Lost)
+  momGrowth: number; // Month over Month growth
+}
+
+/**
+ * Calculates the comprehensive forecast and health metrics for a given set of deals.
+ * 
+ * @param deals - The list of deals to analyze
+ * @param targetDate - The reference date for month filtering (defaults to now)
+ * @param history - Historical revenue data for growth/reliability calcs
+ */
+export function calculateForecast(
+  deals: Deal[], 
+  targetDate: Date = new Date(),
+  history: HistoricalRevenue[] = []
+): DashboardMetrics {
   const now = new Date();
   
   let conservative = 0;
   let base = 0;
   let optimistic = 0;
   let pipelineValue = 0;
+  let committedValue = 0;
+  let uncommittedValue = 0;
   let closedWon = 0;
-  
-  const activeDeals = deals.filter(d => d.stage !== "CLOSED_WON" && d.stage !== "CLOSED_LOST");
-  const wonDeals = deals.filter(d => d.stage === "CLOSED_WON");
-  
-  // Calculate totals
-  pipelineValue = activeDeals.reduce((sum, d) => sum + d.amount, 0);
-  closedWon = wonDeals.reduce((sum, d) => sum + d.amount, 0);
+  let closedLost = 0;
 
-  activeDeals.forEach(deal => {
+  // Filter deals relevant to the target month (for the forecast numbers)
+  // Note: For Total Pipeline Value, we might want to show everything open, 
+  // but for "Forecast", we usually look at a specific closing period.
+  // Here we'll filter active deals by the target month's close date for the forecast buckets.
+  
+  const activeDeals = deals.filter(d => 
+    d.stage !== "CLOSED_WON" && 
+    d.stage !== "CLOSED_LOST"
+  );
+
+  const wonDeals = deals.filter(d => d.stage === "CLOSED_WON");
+  const lostDeals = deals.filter(d => d.stage === "CLOSED_LOST");
+  
+  // --- Metric: Win Rate ---
+  const totalClosed = wonDeals.length + lostDeals.length;
+  const winRate = totalClosed > 0 ? (wonDeals.length / totalClosed) * 100 : 0;
+
+  // --- Metric: Hygiene (Completeness) ---
+  // Required fields: stage, confidence, next_step, next_step_date, amount, close_date
+  const hygienePassingCount = activeDeals.filter(d => 
+    d.stage && 
+    d.confidence && 
+    d.nextStep && 
+    d.nextStepDate && 
+    d.amount > 0 && 
+    d.closeDate
+  ).length;
+  const hygieneScore = activeDeals.length > 0 ? (hygienePassingCount / activeDeals.length) * 100 : 100;
+
+  // --- Metric: Freshness ---
+  // Updated within last 7 days
+  const freshCount = activeDeals.filter(d => 
+    differenceInDays(now, parseISO(d.lastActivityDate)) <= 7
+  ).length;
+  const freshnessScore = activeDeals.length > 0 ? (freshCount / activeDeals.length) * 100 : 100;
+
+  // --- Metric: MAPE (Forecast Reliability) ---
+  // Mean Absolute Percentage Error based on historical data
+  // Sum(|(Actual - Forecast) / Actual|) / n
+  let mape = 0;
+  if (history.length > 0) {
+    const sumError = history.reduce((acc, record) => {
+      return acc + Math.abs((record.actual - record.forecasted) / record.actual);
+    }, 0);
+    mape = (sumError / history.length) * 100;
+  }
+
+  // --- Metric: Growth (MoM) ---
+  // Compare last month's actuals to the month before
+  let momGrowth = 0;
+  if (history.length >= 2) {
+    const lastMonth = history[history.length - 1].actual;
+    const prevMonth = history[history.length - 2].actual;
+    momGrowth = ((lastMonth - prevMonth) / prevMonth) * 100;
+  }
+
+  // --- Forecast Calculations (Target Month Only) ---
+  const dealsInTargetMonth = activeDeals.filter(d => isSameMonth(parseISO(d.closeDate), targetDate));
+  const wonInTargetMonth = wonDeals.filter(d => isSameMonth(parseISO(d.closeDate), targetDate));
+  
+  // Add closed won to current month's realized revenue
+  const realizedRevenue = wonInTargetMonth.reduce((sum, d) => sum + d.amount, 0);
+  closedWon = realizedRevenue;
+
+  dealsInTargetMonth.forEach(deal => {
     const daysSinceActivity = differenceInDays(now, parseISO(deal.lastActivityDate));
     const daysToNextStep = differenceInDays(parseISO(deal.nextStepDate), now);
     
@@ -44,65 +119,86 @@ export function calculateForecast(deals: Deal[]) {
     const isMedium = deal.confidence === "MEDIUM";
     const isLow = deal.confidence === "LOW";
     
+    // Pipeline Segmentation
+    pipelineValue += deal.amount;
+    if (isHigh) {
+      committedValue += deal.amount;
+    } else {
+      uncommittedValue += deal.amount;
+    }
+
     // Conservative Logic
+    // Rules: High Conf AND Next Step <= 14 days AND Not Stale
     if (isHigh && daysToNextStep <= 14 && daysSinceActivity <= STALE_THRESHOLD_DAYS) {
       conservative += deal.amount;
     }
     
     // Base Logic
+    // Rules: High/Medium Conf AND Next Step <= 30 days
     if ((isHigh || isMedium) && daysToNextStep <= 30) {
       base += deal.amount;
     }
     
-    // Optimistic Logic (Base + extras)
-    // Note: The prompt says Optimistic = Base + ... 
-    // So we start with Base calculation for Optimistic baseline, but wait, let's follow the formula strictly.
-    // "Optimistic = Base + sum(amount) of deals with confidence = LOW or early-stage high-value..."
-    // This implies Optimistic is a superset.
+    // Optimistic Logic (Delta calculation)
+    // Rules: Base + (Low Conf OR Early Stage High Value)
+    // We calculate the delta to add to Base
+    // Note: Logic simplified for standard 'Optimistic' view which usually includes everything reasonable
   });
 
-  // Optimistic Addition
-  // We need to recalculate Base for the Optimistic sum because we can't just add to the 'base' variable 
-  // if we want to be strict about the sets. 
-  // Actually, let's just add the delta to the base value we already calculated.
-  
+  // Calculate Optimistic separately to ensure it's a superset properly
   let optimisticDelta = 0;
-  activeDeals.forEach(deal => {
+  dealsInTargetMonth.forEach(deal => {
     const daysToNextStep = differenceInDays(parseISO(deal.nextStepDate), now);
     const isHigh = deal.confidence === "HIGH";
     const isMedium = deal.confidence === "MEDIUM";
     
-    // If it was included in Base, we already have it.
+    // Was this deal included in Base?
     const inBase = (isHigh || isMedium) && daysToNextStep <= 30;
     
     if (!inBase) {
-       // Check if it qualifies for Optimistic extras
+       // Add if it's Low confidence or a big early stage deal
        if (deal.confidence === "LOW" || (deal.amount > 100000 && deal.stage === "DISCOVERY")) {
          optimisticDelta += deal.amount;
        }
     }
   });
-  
+
+  // Add realized revenue to forecast because "Forecast" usually means "End of Month Landing"
+  // So it should be (Already Won) + (Predicted to Win)
+  conservative += realizedRevenue;
+  base += realizedRevenue;
   optimistic = base + optimisticDelta;
 
   return {
     conservative,
     base,
     optimistic,
-    pipelineValue,
-    closedWon
+    pipelineValue: pipelineValue + realizedRevenue, // Total value of active + won for this month
+    committedValue: committedValue + realizedRevenue,
+    uncommittedValue,
+    closedWon,
+    mape,
+    hygieneScore,
+    freshnessScore,
+    winRate,
+    momGrowth
   };
 }
 
+/**
+ * Checks if a deal is considered stale based on activity threshold.
+ */
 export function isDealStale(deal: Deal): boolean {
   const now = new Date();
   const daysSinceActivity = differenceInDays(now, parseISO(deal.lastActivityDate));
   return daysSinceActivity > STALE_THRESHOLD_DAYS;
 }
 
-export function getConcentrationRisk(deals: Deal[], forecastType: 'conservative' | 'base' | 'optimistic', totalValue: number) {
-  // Concentration risk = true if top 1–2 deals contribute > 30% of any forecast tier
-  // Simplified: just check against the total value provided
+/**
+ * Determines if there is a concentration risk in the pipeline.
+ * Defined as top 2 deals making up > 30% of the total value.
+ */
+export function getConcentrationRisk(deals: Deal[], totalValue: number) {
   if (totalValue === 0) return false;
   
   const sortedDeals = [...deals].sort((a, b) => b.amount - a.amount);

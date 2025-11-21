@@ -1,98 +1,180 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { getDeals, getAccounts } from "@/lib/mockData";
-import { calculateForecast, isDealStale } from "@/lib/forecastUtils";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { ArrowUpRight, AlertTriangle, CheckCircle2, TrendingUp } from "lucide-react";
+import { getDeals, getHistoricalRevenue } from "@/lib/mockData";
+import { calculateForecast, isDealStale, getConcentrationRisk } from "@/lib/forecastUtils";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from "recharts";
+import { ArrowUpRight, AlertTriangle, CheckCircle2, TrendingUp, Calendar, Target, Activity, Percent, Users } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format, addMonths, subMonths } from "date-fns";
+import { cn } from "@/lib/utils";
 
+/**
+ * Manager Dashboard Page
+ * Provides high-level visibility into forecast accuracy, pipeline health, and team performance.
+ * Includes month filtering and specific coaching opportunities.
+ */
 export default function Dashboard() {
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const deals = getDeals();
-  const metrics = useMemo(() => calculateForecast(deals), [deals]);
-  const staleDeals = deals.filter(isDealStale);
+  const history = getHistoricalRevenue();
 
-  // Chart Data Preparation
-  const data = [
-    { name: "Conservative", value: metrics.conservative, color: "hsl(var(--chart-2))" },
-    { name: "Base", value: metrics.base, color: "hsl(var(--chart-1))" },
-    { name: "Optimistic", value: metrics.optimistic, color: "hsl(var(--chart-3))" },
+  // Calculate metrics based on selected month
+  const metrics = useMemo(() => {
+    const targetDate = new Date(selectedMonth + "-01"); // Append day to make it parseable
+    return calculateForecast(deals, targetDate, history);
+  }, [deals, selectedMonth, history]);
+
+  const staleDeals = deals.filter(isDealStale);
+  const concentrationRisk = getConcentrationRisk(deals, metrics.pipelineValue);
+
+  // Chart Data: Forecast Composition
+  const forecastData = [
+    { name: "Closed Won", value: metrics.closedWon, color: "hsl(var(--chart-2))" }, // Green
+    { name: "Committed", value: metrics.committedValue, color: "hsl(var(--chart-1))" }, // Blue
+    { name: "Uncommitted", value: metrics.uncommittedValue, color: "hsl(var(--chart-3))" }, // Orange/Yellow
   ];
+
+  // Chart Data: Historical Trend (for Growth Tracking)
+  const trendData = history.map(h => ({
+    name: format(new Date(h.month), 'MMM'),
+    Actual: h.actual,
+    Forecast: h.forecasted
+  }));
 
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-heading font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Your weekly forecast and pipeline health overview.</p>
+      {/* Header & Filters */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-heading font-bold text-foreground">Executive Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Performance, health, and forecast reliability.</p>
+        </div>
+        <div className="flex items-center gap-2 bg-card p-1 rounded-lg border shadow-sm">
+          <Calendar className="w-4 h-4 text-muted-foreground ml-2" />
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="w-[180px] border-0 shadow-none focus:ring-0">
+              <SelectValue placeholder="Select Month" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={format(subMonths(new Date(), 1), 'yyyy-MM')}>Last Month</SelectItem>
+              <SelectItem value={format(new Date(), 'yyyy-MM')}>Current Month</SelectItem>
+              <SelectItem value={format(addMonths(new Date(), 1), 'yyyy-MM')}>Next Month</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Forecast Cards */}
+      {/* Top Level Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-primary/5 border-primary/20">
+          <CardHeader className="pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-primary uppercase tracking-wider flex justify-between">
+              Forecast Reliability
+              <Target className="w-4 h-4 opacity-70" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.mape.toFixed(1)}% MAPE</div>
+            <p className="text-xs text-muted-foreground mt-1">Target: &lt;15% Error</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex justify-between">
+              Pipeline Hygiene
+              <Activity className="w-4 h-4 opacity-70" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={cn("text-2xl font-bold", metrics.hygieneScore < 90 ? "text-orange-600" : "text-green-600")}>
+              {metrics.hygieneScore.toFixed(0)}%
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Target: &ge;90% Complete</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex justify-between">
+              Win Rate
+              <Percent className="w-4 h-4 opacity-70" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.winRate.toFixed(0)}%</div>
+            <p className="text-xs text-muted-foreground mt-1">Balanced flow</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex justify-between">
+              MoM Growth
+              <TrendingUp className="w-4 h-4 opacity-70" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={cn("text-2xl font-bold", metrics.momGrowth > 0 ? "text-green-600" : "text-red-600")}>
+              {metrics.momGrowth > 0 ? "+" : ""}{metrics.momGrowth.toFixed(1)}%
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">vs. Last Month</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 3-Line Forecast Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-l-4 border-l-[hsl(var(--chart-2))] shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-green-500 shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Conservative Forecast</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Conservative</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">{formatCurrency(metrics.conservative)}</div>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3 text-[hsl(var(--chart-2))]" />
-              High confidence, closing soon
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Locked-in revenue</p>
           </CardContent>
         </Card>
-
-        <Card className="border-l-4 border-l-[hsl(var(--chart-1))] shadow-sm hover:shadow-md transition-shadow bg-primary/5">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm bg-blue-50/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-primary uppercase tracking-wider">Base Forecast</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">Base Forecast</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary">{formatCurrency(metrics.base)}</div>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-primary" />
-              Weighted pipeline + committed
-            </p>
+            <div className="text-3xl font-bold text-blue-700">{formatCurrency(metrics.base)}</div>
+            <p className="text-xs text-blue-600/80 mt-1">Most likely outcome</p>
           </CardContent>
         </Card>
-
-        <Card className="border-l-4 border-l-[hsl(var(--chart-3))] shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-orange-500 shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Optimistic Forecast</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Optimistic</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">{formatCurrency(metrics.optimistic)}</div>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-              <ArrowUpRight className="w-3 h-3 text-[hsl(var(--chart-3))]" />
-              Includes upside & early big deals
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Upside potential</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Chart Section */}
+        {/* Chart: Pipeline Composition */}
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Forecast Analysis</CardTitle>
-            <CardDescription>Projected revenue scenarios for this month</CardDescription>
+            <CardTitle>Forecast Composition</CardTitle>
+            <CardDescription>Breakdown of Committed vs. Uncommitted revenue</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} />
-                <YAxis 
-                  tickFormatter={(value) => `$${value / 1000}k`} 
-                  tickLine={false} 
-                  axisLine={false} 
-                  fontSize={12}
-                />
+              <BarChart data={forecastData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                <XAxis type="number" hide />
+                <YAxis dataKey="name" type="category" width={100} tickLine={false} axisLine={false} fontSize={12} />
                 <Tooltip 
                   cursor={{ fill: 'transparent' }}
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   formatter={(value: number) => [formatCurrency(value), "Value"]}
                 />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={60}>
-                  {data.map((entry, index) => (
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={40}>
+                  {forecastData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Bar>
@@ -101,41 +183,100 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Stale Deals Alert */}
+        {/* Chart: Historical Accuracy */}
         <Card className="shadow-sm">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-orange-500" />
-                Risk Signals
-              </CardTitle>
-              <span className="text-xs font-medium px-2 py-1 bg-orange-100 text-orange-700 rounded-full">
-                {staleDeals.length} Stale Deals
-              </span>
-            </div>
-            <CardDescription>Deals with no activity in &gt; 7 days</CardDescription>
+            <CardTitle>Growth & Accuracy</CardTitle>
+            <CardDescription>Actual vs. Forecasted Revenue Trend</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trendData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} />
+                <YAxis tickFormatter={(val) => `$${val/1000}k`} tickLine={false} axisLine={false} fontSize={12} />
+                <Tooltip formatter={(value: number) => [formatCurrency(value), "Revenue"]} />
+                <Legend />
+                <Line type="monotone" dataKey="Forecast" stroke="hsl(var(--muted-foreground))" strokeDasharray="5 5" strokeWidth={2} />
+                <Line type="monotone" dataKey="Actual" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Risk Panel */}
+        <Card className="border-red-100 bg-red-50/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-900">
+              <AlertTriangle className="w-5 h-5" />
+              Top Risks
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {concentrationRisk && (
+              <div className="flex items-start gap-3 p-3 bg-white rounded-md border border-red-100 shadow-sm">
+                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-sm text-red-900">Concentration Risk Detected</h4>
+                  <p className="text-xs text-red-700 mt-1">Top 2 deals contribute &gt;30% of your forecast. Diversify pipeline immediately.</p>
+                </div>
+              </div>
+            )}
+            {staleDeals.length > 0 && (
+              <div className="flex items-start gap-3 p-3 bg-white rounded-md border border-orange-100 shadow-sm">
+                <Activity className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-sm text-orange-900">{staleDeals.length} Stale Deals</h4>
+                  <p className="text-xs text-orange-700 mt-1">Deals with no activity in 7+ days. Review immediately.</p>
+                </div>
+              </div>
+            )}
+            {metrics.freshnessScore < 80 && (
+              <div className="flex items-start gap-3 p-3 bg-white rounded-md border border-yellow-100 shadow-sm">
+                <Calendar className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-sm text-yellow-900">Low Freshness ({metrics.freshnessScore.toFixed(0)}%)</h4>
+                  <p className="text-xs text-yellow-700 mt-1">Target is 80%. Team needs to update next steps more frequently.</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Coaching List */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Coaching Opportunities
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {staleDeals.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-500 opacity-50" />
-                  Pipeline is fresh! No stale deals.
-                </div>
-              ) : (
-                staleDeals.map(deal => (
-                  <div key={deal.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50 hover:bg-muted/50 transition-colors">
-                    <div>
-                      <p className="font-medium text-sm">{deal.title}</p>
-                      <p className="text-xs text-muted-foreground">{getAccounts().find(a => a.id === deal.accountId)?.name}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold">{formatCurrency(deal.amount)}</p>
-                      <p className="text-xs text-orange-600 font-medium">Stale</p>
-                    </div>
+              {metrics.winRate < 40 && (
+                 <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                  <div className="flex justify-between">
+                    <h4 className="font-bold text-sm">Win Rate Optimization</h4>
+                    <span className="text-xs font-bold text-red-600">High Impact</span>
                   </div>
-                ))
+                  <p className="text-xs text-muted-foreground mt-1">Win rate is below 40%. Review qualification criteria in Discovery stage with team.</p>
+                </div>
               )}
+              <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                <div className="flex justify-between">
+                  <h4 className="font-bold text-sm">Alex Sales</h4>
+                  <span className="text-xs font-bold text-orange-600">Medium Impact</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Has 3 deals in Negotiation for &gt; 14 days. Strategy session needed.</p>
+              </div>
+               <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                <div className="flex justify-between">
+                  <h4 className="font-bold text-sm">Jordan Closer</h4>
+                  <span className="text-xs font-bold text-green-600">Positive Reinforcement</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">100% Pipeline Hygiene this week. Use as example in team meeting.</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -143,3 +284,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

@@ -1,12 +1,17 @@
-import { addDays, subDays } from "date-fns";
+import { addDays, subDays, subMonths } from "date-fns";
 
 /**
  * Types for the Sales Buddy CRM
+ * Defines the core data structures used throughout the application.
  */
 
+// Confidence levels for deal probability
 export type Confidence = "HIGH" | "MEDIUM" | "LOW";
+
+// Sales stages in the pipeline
 export type Stage = "LEAD" | "DISCOVERY" | "PROPOSAL" | "NEGOTIATION" | "CLOSED_WON" | "CLOSED_LOST";
 
+// Account information structure
 export interface Account {
   id: string;
   name: string;
@@ -18,6 +23,7 @@ export interface Account {
   avatar?: string;
 }
 
+// Deal information structure
 export interface Deal {
   id: string;
   accountId: string;
@@ -38,18 +44,16 @@ export interface Deal {
   probability: number; // 0-100
 }
 
-export interface SalesMetrics {
-  forecastConservative: number;
-  forecastBase: number;
-  forecastOptimistic: number;
-  pipelineValue: number;
-  winRate: number;
-  dealCount: number;
-  staleDealCount: number;
+// Historical revenue data for MAPE calculation
+export interface HistoricalRevenue {
+  month: string; // YYYY-MM
+  forecasted: number;
+  actual: number;
 }
 
 /**
  * Mock Data Generation
+ * Provides a static set of data to simulate a backend database.
  */
 
 const ACCOUNTS: Account[] = [
@@ -58,11 +62,23 @@ const ACCOUNTS: Account[] = [
   { id: "acc-3", name: "Pacific Wings", contactFirstName: "Ellen", contactLastName: "Ripley", phone: "+1 (555) 010-3003", email: "ellen@pacificwings.com", industry: "Aviation" },
   { id: "acc-4", name: "TechFlow Systems", contactFirstName: "Neo", contactLastName: "Anderson", phone: "+1 (555) 010-4004", email: "neo@techflow.com", industry: "Technology" },
   { id: "acc-5", name: "Global Logistics", contactFirstName: "Marty", contactLastName: "McFly", phone: "+1 (555) 010-5005", email: "marty@globallogistics.com", industry: "Logistics" },
+  { id: "acc-6", name: "Cyberdyne Systems", contactFirstName: "Miles", contactLastName: "Dyson", phone: "+1 (555) 010-6006", email: "miles@cyberdyne.com", industry: "Technology" },
+  { id: "acc-7", name: "InGen", contactFirstName: "John", contactLastName: "Hammond", phone: "+1 (555) 010-7007", email: "john@ingen.com", industry: "Biotech" },
 ];
 
 const OWNERS = [
   { id: "user-1", name: "Alex Sales" },
   { id: "user-2", name: "Jordan Closer" },
+];
+
+// Historical data for growth and reliability tracking
+const HISTORICAL_REVENUE: HistoricalRevenue[] = [
+  { month: "2024-08", forecasted: 850000, actual: 820000 },
+  { month: "2024-09", forecasted: 900000, actual: 950000 },
+  { month: "2024-10", forecasted: 920000, actual: 880000 },
+  { month: "2024-11", forecasted: 950000, actual: 980000 },
+  { month: "2024-12", forecasted: 1100000, actual: 1050000 },
+  { month: "2025-01", forecasted: 980000, actual: 1020000 }, // Last month
 ];
 
 const DEALS: Deal[] = [
@@ -113,7 +129,7 @@ const DEALS: Deal[] = [
     stage: "DISCOVERY",
     confidence: "LOW",
     closeDate: addDays(new Date(), 60).toISOString(),
-    lastActivityDate: subDays(new Date(), 12).toISOString(), // Stale?
+    lastActivityDate: subDays(new Date(), 12).toISOString(), // Stale
     nextStep: "Schedule stakeholders meeting",
     nextStepDate: addDays(new Date(), 7).toISOString(),
     createdAt: subDays(new Date(), 15).toISOString(),
@@ -174,18 +190,82 @@ const DEALS: Deal[] = [
     updatedAt: subDays(new Date(), 0).toISOString(),
     probability: 90,
   },
+  // Add more deals for future months to enable filtering
+  {
+    id: "deal-7",
+    accountId: "acc-6",
+    ownerId: "user-1",
+    ownerName: "Alex Sales",
+    title: "AI Infrastructure Upgrade",
+    amount: 600000,
+    currency: "USD",
+    stage: "DISCOVERY",
+    confidence: "LOW",
+    closeDate: addDays(new Date(), 45).toISOString(), // Next Month
+    lastActivityDate: subDays(new Date(), 1).toISOString(),
+    nextStep: "Demo POC",
+    nextStepDate: addDays(new Date(), 5).toISOString(),
+    createdAt: subDays(new Date(), 5).toISOString(),
+    updatedAt: subDays(new Date(), 1).toISOString(),
+    probability: 30,
+  },
+  {
+    id: "deal-8",
+    accountId: "acc-7",
+    ownerId: "user-2",
+    ownerName: "Jordan Closer",
+    title: "Lab Equipment Supply",
+    amount: 350000,
+    currency: "USD",
+    stage: "PROPOSAL",
+    confidence: "MEDIUM",
+    closeDate: addDays(new Date(), 50).toISOString(), // Next Month
+    lastActivityDate: subDays(new Date(), 3).toISOString(),
+    nextStep: "Negotiate terms",
+    nextStepDate: addDays(new Date(), 4).toISOString(),
+    createdAt: subDays(new Date(), 10).toISOString(),
+    updatedAt: subDays(new Date(), 3).toISOString(),
+    probability: 50,
+  },
+  {
+    id: "deal-9",
+    accountId: "acc-4",
+    ownerId: "user-1",
+    ownerName: "Alex Sales",
+    title: "Support Renewal 2025",
+    amount: 50000,
+    currency: "USD",
+    stage: "NEGOTIATION",
+    confidence: "HIGH",
+    closeDate: addDays(new Date(), 8).toISOString(),
+    lastActivityDate: subDays(new Date(), 1).toISOString(),
+    nextStep: "Sign renewal",
+    nextStepDate: addDays(new Date(), 1).toISOString(),
+    createdAt: subDays(new Date(), 30).toISOString(),
+    updatedAt: subDays(new Date(), 1).toISOString(),
+    probability: 95,
+  }
 ];
 
+/**
+ * Data Accessors
+ * Functions to retrieve data from the mock database.
+ */
 export const getAccounts = () => ACCOUNTS;
 export const getDeals = () => DEALS;
+export const getHistoricalRevenue = () => HISTORICAL_REVENUE;
 export const getAccount = (id: string) => ACCOUNTS.find((a) => a.id === id);
 export const getAccountDeals = (accountId: string) => DEALS.filter((d) => d.accountId === accountId);
 
-// Helper to simulate "adding" data (in memory only)
+/**
+ * Data Modifiers
+ * Functions to update data in the mock database (in-memory only).
+ */
 export const addDeal = (deal: Deal) => {
     DEALS.push(deal);
     return deal;
 };
+
 export const updateDeal = (id: string, updates: Partial<Deal>) => {
     const index = DEALS.findIndex(d => d.id === id);
     if (index !== -1) {
@@ -194,4 +274,3 @@ export const updateDeal = (id: string, updates: Partial<Deal>) => {
     }
     return null;
 };
-
