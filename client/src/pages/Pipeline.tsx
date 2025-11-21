@@ -227,11 +227,20 @@ export default function Pipeline() {
                 <Label htmlFor="amount" className={errors.amount ? "text-red-500" : ""}>Amount ($)</Label>
                 <Input 
                   id="amount" 
-                  type="number" 
-                  value={editForm.amount || 0} 
+                  type="text" 
+                  value={editForm.amount || ""} 
                   onChange={(e) => {
-                    setEditForm({...editForm, amount: Number(e.target.value)});
-                    if (errors.amount) setErrors({...errors, amount: ""});
+                    const val = e.target.value;
+                    if (val && !/^\d*$/.test(val)) {
+                      setErrors({...errors, amount: "Amount must be a number"});
+                    } else {
+                      setEditForm({...editForm, amount: Number(val)});
+                      if (errors.amount) {
+                         const newErrors = {...errors};
+                         delete newErrors.amount;
+                         setErrors(newErrors);
+                      }
+                    }
                   }}
                   className={errors.amount ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
@@ -292,13 +301,23 @@ export default function Pipeline() {
               </div>
               <Input 
                 id="probability" 
-                type="number" 
-                min="0" 
-                max="100" 
-                value={editForm.probability || 0} 
+                type="text" 
+                value={editForm.probability || ""} 
                 onChange={(e) => {
-                  setEditForm({...editForm, probability: Number(e.target.value)});
-                  if (errors.probability) setErrors({...errors, probability: ""});
+                  const val = e.target.value;
+                  if (val && !/^\d*$/.test(val)) {
+                    setErrors({...errors, probability: "Probability must be a number"});
+                  } else {
+                    const num = Number(val);
+                    setEditForm({...editForm, probability: num});
+                    if (num < 0 || num > 100) {
+                         setErrors({...errors, probability: "Probability must be between 0 and 100"});
+                    } else if (errors.probability) {
+                         const newErrors = {...errors};
+                         delete newErrors.probability;
+                         setErrors(newErrors);
+                    }
+                  }
                 }}
                 className={errors.probability ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
