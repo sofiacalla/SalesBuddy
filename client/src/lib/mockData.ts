@@ -1,4 +1,4 @@
-import { addDays, subDays, subMonths, addMonths, format } from "date-fns";
+import { addDays, subDays, subMonths, addMonths, format, eachMonthOfInterval, startOfYear, endOfYear } from "date-fns";
 
 /**
  * Types for the Sales Buddy CRM
@@ -101,13 +101,97 @@ const generateHistory = (): HistoricalRevenue[] => {
 
 const HISTORICAL_REVENUE = generateHistory();
 
+// Helper to generate deals across the whole current year
+const generateAnnualDeals = (): Deal[] => {
+    const deals: Deal[] = [];
+    const now = new Date();
+    const start = startOfYear(now);
+    const end = endOfYear(now);
+    const months = eachMonthOfInterval({ start, end });
+    
+    const dealTemplates = [
+        { title: "Enterprise Expansion", amount: 450000, stage: "NEGOTIATION", confidence: "HIGH" },
+        { title: "Maintenance Contract", amount: 120000, stage: "PROPOSAL", confidence: "MEDIUM" },
+        { title: "New Logistics Route", amount: 850000, stage: "DISCOVERY", confidence: "LOW" },
+        { title: "Software License", amount: 200000, stage: "CLOSED_WON", confidence: "HIGH" },
+        { title: "Training Module", amount: 25000, stage: "PROPOSAL", confidence: "MEDIUM" },
+        { title: "Tracking System", amount: 1200000, stage: "NEGOTIATION", confidence: "HIGH" },
+        { title: "Infrastructure Upgrade", amount: 600000, stage: "DISCOVERY", confidence: "LOW" },
+        { title: "Equipment Supply", amount: 350000, stage: "PROPOSAL", confidence: "MEDIUM" },
+        { title: "Support Renewal", amount: 50000, stage: "NEGOTIATION", confidence: "HIGH" },
+        { title: "Consulting Project", amount: 75000, stage: "CLOSED_WON", confidence: "HIGH" }
+    ];
+
+    let dealCounter = 1;
+
+    months.forEach(month => {
+        // Add 2-4 deals per month
+        const dealsCount = Math.floor(Math.random() * 3) + 2;
+        
+        for (let i = 0; i < dealsCount; i++) {
+            const template = dealTemplates[Math.floor(Math.random() * dealTemplates.length)];
+            const account = ACCOUNTS[Math.floor(Math.random() * ACCOUNTS.length)];
+            const owner = OWNERS[Math.floor(Math.random() * OWNERS.length)];
+            
+            // Random day within the month
+            const closeDate = addDays(month, Math.floor(Math.random() * 25) + 1);
+            
+            // Adjust stage based on if date is past
+            let stage = template.stage as Stage;
+            let confidence = template.confidence as Confidence;
+            let probability = 50;
+            
+            if (closeDate < now && stage !== "CLOSED_WON" && stage !== "CLOSED_LOST") {
+                // Past deals should be closed or very late
+                 if (Math.random() > 0.7) {
+                     stage = "CLOSED_WON";
+                     probability = 100;
+                 } else if (Math.random() > 0.5) {
+                     stage = "CLOSED_LOST";
+                     probability = 0;
+                 }
+            }
+            
+            if (stage === "CLOSED_WON") probability = 100;
+            if (stage === "CLOSED_LOST") probability = 0;
+            if (stage === "NEGOTIATION") probability = 90;
+            if (stage === "PROPOSAL") probability = 60;
+            if (stage === "DISCOVERY") probability = 20;
+
+            deals.push({
+                id: `deal-gen-${dealCounter++}`,
+                accountId: account.id,
+                ownerId: owner.id,
+                ownerName: owner.name,
+                title: `${template.title} ${format(month, 'MMM')}`,
+                amount: template.amount + (Math.random() * 50000 - 25000),
+                currency: "USD",
+                stage: stage,
+                confidence: confidence,
+                closeDate: closeDate.toISOString(),
+                lastActivityDate: subDays(now, Math.floor(Math.random() * 20)).toISOString(),
+                nextStep: "Follow up",
+                nextStepDate: addDays(now, 3).toISOString(),
+                createdAt: subDays(closeDate, 60).toISOString(),
+                updatedAt: subDays(now, 2).toISOString(),
+                probability: probability
+            });
+        }
+    });
+    
+    return deals;
+};
+
+// Combine generated deals with some specific ones if needed, or just use generated ones for full coverage
 const DEALS: Deal[] = [
-  {
-    id: "deal-1",
+    ...generateAnnualDeals(),
+    // Keep a few explicit ones for testing specific scenarios if needed
+    {
+    id: "deal-specific-1",
     accountId: "acc-1",
     ownerId: "user-1",
     ownerName: "Alex Sales",
-    title: "Q3 Fleet Expansion",
+    title: "Q3 Fleet Expansion (Manual)",
     amount: 450000,
     currency: "USD",
     stage: "NEGOTIATION",
@@ -119,224 +203,6 @@ const DEALS: Deal[] = [
     createdAt: subDays(new Date(), 45).toISOString(),
     updatedAt: subDays(new Date(), 2).toISOString(),
     probability: 85,
-  },
-  {
-    id: "deal-2",
-    accountId: "acc-2",
-    ownerId: "user-1",
-    ownerName: "Alex Sales",
-    title: "Maintenance Contract Renewal",
-    amount: 120000,
-    currency: "USD",
-    stage: "PROPOSAL",
-    confidence: "MEDIUM",
-    closeDate: addDays(new Date(), 25).toISOString(),
-    lastActivityDate: subDays(new Date(), 5).toISOString(),
-    nextStep: "Present proposal to board",
-    nextStepDate: addDays(new Date(), 5).toISOString(),
-    createdAt: subDays(new Date(), 20).toISOString(),
-    updatedAt: subDays(new Date(), 5).toISOString(),
-    probability: 60,
-  },
-  {
-    id: "deal-3",
-    accountId: "acc-3",
-    ownerId: "user-2",
-    ownerName: "Jordan Closer",
-    title: "New Route Logistics",
-    amount: 850000,
-    currency: "USD",
-    stage: "DISCOVERY",
-    confidence: "LOW",
-    closeDate: addDays(new Date(), 60).toISOString(),
-    lastActivityDate: subDays(new Date(), 12).toISOString(), // Stale
-    nextStep: "Schedule stakeholders meeting",
-    nextStepDate: addDays(new Date(), 7).toISOString(),
-    createdAt: subDays(new Date(), 15).toISOString(),
-    updatedAt: subDays(new Date(), 12).toISOString(),
-    probability: 20,
-  },
-  {
-    id: "deal-4",
-    accountId: "acc-4",
-    ownerId: "user-2",
-    ownerName: "Jordan Closer",
-    title: "Enterprise Software License",
-    amount: 200000,
-    currency: "USD",
-    stage: "CLOSED_WON",
-    confidence: "HIGH",
-    closeDate: subDays(new Date(), 5).toISOString(),
-    lastActivityDate: subDays(new Date(), 5).toISOString(),
-    nextStep: "Handover to Customer Success",
-    nextStepDate: addDays(new Date(), 1).toISOString(),
-    createdAt: subDays(new Date(), 60).toISOString(),
-    updatedAt: subDays(new Date(), 5).toISOString(),
-    probability: 100,
-  },
-  {
-    id: "deal-5",
-    accountId: "acc-1",
-    ownerId: "user-1",
-    ownerName: "Alex Sales",
-    title: "Training Module Add-on",
-    amount: 25000,
-    currency: "USD",
-    stage: "PROPOSAL",
-    confidence: "MEDIUM",
-    closeDate: addDays(new Date(), 15).toISOString(),
-    lastActivityDate: subDays(new Date(), 1).toISOString(),
-    nextStep: "Send revised pricing",
-    nextStepDate: addDays(new Date(), 1).toISOString(),
-    createdAt: subDays(new Date(), 10).toISOString(),
-    updatedAt: subDays(new Date(), 1).toISOString(),
-    probability: 50,
-  },
-  {
-    id: "deal-6",
-    accountId: "acc-5",
-    ownerId: "user-2",
-    ownerName: "Jordan Closer",
-    title: "Global Tracking System",
-    amount: 1200000,
-    currency: "USD",
-    stage: "NEGOTIATION",
-    confidence: "HIGH",
-    closeDate: addDays(new Date(), 14).toISOString(),
-    lastActivityDate: subDays(new Date(), 0).toISOString(),
-    nextStep: "Sign contract",
-    nextStepDate: addDays(new Date(), 3).toISOString(),
-    createdAt: subDays(new Date(), 90).toISOString(),
-    updatedAt: subDays(new Date(), 0).toISOString(),
-    probability: 90,
-  },
-  // Future Deals (Next Month)
-  {
-    id: "deal-7",
-    accountId: "acc-6",
-    ownerId: "user-1",
-    ownerName: "Alex Sales",
-    title: "AI Infrastructure Upgrade",
-    amount: 600000,
-    currency: "USD",
-    stage: "DISCOVERY",
-    confidence: "LOW",
-    closeDate: addDays(new Date(), 45).toISOString(), // Next Month
-    lastActivityDate: subDays(new Date(), 1).toISOString(),
-    nextStep: "Demo POC",
-    nextStepDate: addDays(new Date(), 5).toISOString(),
-    createdAt: subDays(new Date(), 5).toISOString(),
-    updatedAt: subDays(new Date(), 1).toISOString(),
-    probability: 30,
-  },
-  {
-    id: "deal-8",
-    accountId: "acc-7",
-    ownerId: "user-2",
-    ownerName: "Jordan Closer",
-    title: "Lab Equipment Supply",
-    amount: 350000,
-    currency: "USD",
-    stage: "PROPOSAL",
-    confidence: "MEDIUM",
-    closeDate: addDays(new Date(), 50).toISOString(), // Next Month
-    lastActivityDate: subDays(new Date(), 3).toISOString(),
-    nextStep: "Negotiate terms",
-    nextStepDate: addDays(new Date(), 4).toISOString(),
-    createdAt: subDays(new Date(), 10).toISOString(),
-    updatedAt: subDays(new Date(), 3).toISOString(),
-    probability: 50,
-  },
-  {
-    id: "deal-9",
-    accountId: "acc-4",
-    ownerId: "user-1",
-    ownerName: "Alex Sales",
-    title: "Support Renewal 2025",
-    amount: 50000,
-    currency: "USD",
-    stage: "NEGOTIATION",
-    confidence: "HIGH",
-    closeDate: addDays(new Date(), 8).toISOString(),
-    lastActivityDate: subDays(new Date(), 1).toISOString(),
-    nextStep: "Sign renewal",
-    nextStepDate: addDays(new Date(), 1).toISOString(),
-    createdAt: subDays(new Date(), 30).toISOString(),
-    updatedAt: subDays(new Date(), 1).toISOString(),
-    probability: 95,
-  },
-  {
-    id: "deal-new-1",
-    accountId: "acc-3",
-    ownerId: "user-2",
-    ownerName: "Jordan Closer",
-    title: "Logistics Expansion Phase 2",
-    amount: 320000,
-    currency: "USD",
-    stage: "PROPOSAL",
-    confidence: "MEDIUM",
-    closeDate: addDays(new Date(), 12).toISOString(),
-    lastActivityDate: subDays(new Date(), 2).toISOString(),
-    nextStep: "Review proposal",
-    nextStepDate: addDays(new Date(), 3).toISOString(),
-    createdAt: subDays(new Date(), 10).toISOString(),
-    updatedAt: subDays(new Date(), 2).toISOString(),
-    probability: 50,
-  },
-  {
-    id: "deal-new-2",
-    accountId: "acc-5",
-    ownerId: "user-1",
-    ownerName: "Alex Sales",
-    title: "Warehouse Automation Pilot",
-    amount: 150000,
-    currency: "USD",
-    stage: "DISCOVERY",
-    confidence: "LOW",
-    closeDate: addDays(new Date(), 20).toISOString(),
-    lastActivityDate: subDays(new Date(), 1).toISOString(),
-    nextStep: "Onsite visit",
-    nextStepDate: addDays(new Date(), 5).toISOString(),
-    createdAt: subDays(new Date(), 5).toISOString(),
-    updatedAt: subDays(new Date(), 1).toISOString(),
-    probability: 20,
-  },
-   // Last Month Deals (Simulated Closed Won history or slipped deals)
-  {
-    id: "deal-10",
-    accountId: "acc-2",
-    ownerId: "user-1",
-    ownerName: "Alex Sales",
-    title: "Q1 Initial Pilot",
-    amount: 80000,
-    currency: "USD",
-    stage: "CLOSED_WON",
-    confidence: "HIGH",
-    closeDate: subMonths(new Date(), 1).toISOString(),
-    lastActivityDate: subMonths(new Date(), 1).toISOString(),
-    nextStep: "Deployment",
-    nextStepDate: subMonths(new Date(), 1).toISOString(),
-    createdAt: subMonths(new Date(), 3).toISOString(),
-    updatedAt: subMonths(new Date(), 1).toISOString(),
-    probability: 100,
-  },
-  {
-    id: "deal-11",
-    accountId: "acc-5",
-    ownerId: "user-2",
-    ownerName: "Jordan Closer",
-    title: "Previous Consulting Engagement",
-    amount: 45000,
-    currency: "USD",
-    stage: "CLOSED_WON",
-    confidence: "HIGH",
-    closeDate: subMonths(new Date(), 1).toISOString(),
-    lastActivityDate: subMonths(new Date(), 1).toISOString(),
-    nextStep: "Complete",
-    nextStepDate: subMonths(new Date(), 1).toISOString(),
-    createdAt: subMonths(new Date(), 2).toISOString(),
-    updatedAt: subMonths(new Date(), 1).toISOString(),
-    probability: 100,
   }
 ];
 

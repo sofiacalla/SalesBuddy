@@ -5,7 +5,7 @@ import { calculateForecast, isDealStale, getConcentrationRisk } from "@/lib/fore
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from "recharts";
 import { ArrowUpRight, AlertTriangle, CheckCircle2, TrendingUp, Calendar, Target, Activity, Percent, Users, Info } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format, addMonths, subMonths } from "date-fns";
+import { format, addMonths, subMonths, eachMonthOfInterval, startOfYear, endOfYear } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -23,6 +23,12 @@ export default function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const deals = getDeals();
   const history = getHistoricalRevenue();
+
+  // Generate months for the dropdown (Current Year)
+  const months = eachMonthOfInterval({
+    start: startOfYear(new Date()),
+    end: endOfYear(new Date())
+  });
 
   // Calculate metrics based on selected month
   const metrics = useMemo(() => {
@@ -66,9 +72,11 @@ export default function Dashboard() {
               <SelectValue placeholder="Select Month" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={format(subMonths(new Date(), 1), 'yyyy-MM')}>{format(subMonths(new Date(), 1), 'MMMM yyyy')}</SelectItem>
-              <SelectItem value={format(new Date(), 'yyyy-MM')}>{format(new Date(), 'MMMM yyyy')}</SelectItem>
-              <SelectItem value={format(addMonths(new Date(), 1), 'yyyy-MM')}>{format(addMonths(new Date(), 1), 'MMMM yyyy')}</SelectItem>
+              {months.map((month) => (
+                <SelectItem key={format(month, 'yyyy-MM')} value={format(month, 'yyyy-MM')}>
+                  {format(month, 'MMMM yyyy')}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
