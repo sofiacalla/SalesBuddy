@@ -1,0 +1,103 @@
+Context (problem to solve)
+•	Role: Sales manager responsible for team performance and revenue forecasting.
+•	Core pain: Forecasts are overly optimistic and unreliable because deal data is stale, subjective, and inconsistently maintained. Managers cannot quickly see which deals are stuck, why, or what the real monthly outlook is. Leadership cannot trust the forecast.
+•	App concept summary: A thin, opinionated layer on top of existing CRMs that enforces a weekly rhythm where reps quickly update deal stage, confidence, and next action; the app calculates conservative/base/optimistic forecasts; it flags stale deals and highlights top-priority deals for the week.
+App Characteristics:
+•	This has to be an html app, that can run in any browser
+•	Name: sales buddy.
+•	Differentiator from other CRMS
+•	The code has to be clearly commented in all sections so it it understood everything that its do it.
+•	It should have a Clean, well-commented code, clear README, easy to run, AI integration points explained, modular architecture, could be easily maintained
+•	The app has to show error handling, meaning if the seller inputs incorrect information it should tell it to correct and why
+•	THE APP HAS TO PRODUCE THE DOWLOADABLE FORECAST
+App Sections & Screens
+1. Account Summary Screen
+Purpose: Provide a quick snapshot of each account.
+Features:
+• Clickable account list that opens a detail window.
+• Account detail fields: account name, contact first name, contact last name, phone number, email.
+• 	List of open leads and opportunities with stage, value, and next steps.
+• 	AI insights for accounts: recommended next actions, risk signals, upsell or cross-sell suggestions.
+• 	Quick action buttons to add new leads, update stage, or log activity.
+2. 	Pipeline Details Screen
+Purpose: Show the full pipeline across accounts.
+Features:
+• 	Filter options by seller, account, sales stage, and date range.
+• 	Pipeline table or Kanban view showing deal name, stage, value, probability, and next step.
+• 	Add or update button to input new opportunities or edit existing ones.
+• 	AI insights for opportunities: probability adjustments, recommended next steps, stage progression suggestions, alerts for stale deals or missing data.
+• 	Aggregate totals of pipeline value by stage, seller, or account.
+• 	Export option for reporting.
+3. 	Metrics & Analytics Screen
+Purpose: Display performance and pipeline health.
+Features:
+• 	Key KPIs: forecast reliability, pipeline hygiene, freshness, win rate, growth.
+• 	Charts showing pipeline and leads by month.
+• 	Charts showing pipeline by sales stage.
+• 	Accuracy panel comparing forecast versus actual revenue.
+• 	Drill-down option to view underlying deals by clicking chart segments.
+• 	Traffic-light indicators for thresholds met or not met.
+4. 	Instruction Guide & Configuration Screen
+Purpose: Help users onboard and personalize their CRM.
+Features:
+• 	Step-by-step guide on adding accounts, updating pipeline, and viewing metrics.
+• 	Configuration options for required fields, customizable sales stages, and notification preferences.
+• 	FAQ or help section with quick tips.
+• 	User profile settings including name, role, and team.
+• 	Demo setup preloaded with fake airline industry data (sample accounts such as SkyJet Airlines, CloudAir, Pacific Wings) to illustrate pipeline flow, AI recommendations, and metrics without using real customer data.
+First screen: 
+account summary, you have to be able to click on the account  and it has to open a new window to  review or input, account name, contact name and last name, contact phone number, contact email. Also this section has to have a list of all open leads an opportunities for the account and their stage, and next steps
+Second screen: 
+PIPELINe details, where you see all the pipeline for the accounts, you have to be able to filter by seller, accounts, sales stage and also a button to input more information. 
+
+Third screen: 
+Panel that shows the metrics
+Charts that show pipeline and leads by month and another that shows it by sales stage
+Fourth screen:
+Instruction guide and configuration for the user
+Primary objectives (prioritized)
+1.	Improve forecast reliability so team-reported pipeline more closely matches actual closed revenue.
+2.	Increase pipeline hygiene and transparency through guided, low-friction rep updates.
+3.	Provide manager-ready artifacts (forecast exports, coaching lists, weekly digest) that are accurate, complete, and actionable.
+Deliverables you must produce when asked
+•	One-paragraph product vision and one-line positioning statement.
+•	Feature breakdown by user persona (Rep, Manager, Admin) with acceptance criteria for each feature.
+•	Minimal data model and required CRM fields (including timestamps) plus a sample JSON schema for deal objects and weekly updates.
+•	API contract examples for integrating with an existing CRM (read-only sync points and safe write-back endpoints for approved audit_changes).
+•	UX flow for the Rep "My Week" guided update and the Manager overview with precise screen content and microcopy.
+•	Forecast calculation spec: deterministic rules for conservative/base/optimistic tiers, concentration-risk rule, and traceability output (which deals contributed and why).
+•	Validation & quality rules (e.g., high-confidence requires next step + date; stale threshold behavior).
+•	Success metrics mapped to goals with data sources, measurement methods, and numeric acceptance thresholds.
+•	Test cases and sample data for unit, integration, and acceptance testing that demonstrate quality and metric calculations.
+•	A prioritized 6–8 week implementation roadmap broken into sprints with deliverable artifacts per sprint.
+•	A short exportable manager-ready forecast template and a one-week sample digest report.
+Minimal data model (deliver in schema form)
+•	Deal (id, account_id, owner_id, stage, amount, currency, close_date, last_activity_date, crm_confidence, next_step_text, next_step_date, created_at, updated_at)
+•	WeeklyUpdate (deal_id, updater_id, stage, confidence, next_step_text, next_step_date, update_date, notes_flagged)
+•	Settings (stale_threshold_days, confidence_weights, forecast_time_windows)
+Forecast rules (provide deterministic formulas)
+•	Conservative = sum(amount) of deals where confidence >= HIGH AND next_step_date within 14 days AND last_activity_date within stale_threshold.
+•	Base = sum(amount) of deals where confidence in {HIGH, MEDIUM} AND next_step_date within 30 days.
+•	Optimistic = Base + sum(amount) of deals with confidence = LOW or early-stage high-value deals flagged by priority rules.
+•	Concentration risk = true if top 1–2 deals contribute > 30% of any forecast tier; include recommended mitigation action.
+Quality & validation rules (enforceable)
+•	High confidence requires non-empty next_step_text and next_step_date; otherwise add quality_issue and a critical nudge.
+•	Stale if days_since(last_activity_date) > stale_threshold_days; add to stale_deals list and surface recommended action.
+•	Required fields for accurate forecasting: stage, confidence, next_step_text, next_step_date, amount, close_date. Report percent completeness.
+Success metric: 
+•	Forecast Reliability: Track Mean Absolute Percentage Error (MAPE) between predicted vs. actual monthly revenue, aiming for ≥20–30% reduction.
+• 	Pipeline Hygiene: Measure % of active deals with all required fields completed; target ≥90% completeness.
+• 	Pipeline Freshness: Monitor % of deals updated within the last 7 days; target ≥80% freshness.
+• 	Stage Distribution & Win Rate: Evaluate % of deals across stages and calculate win rate (closed-won ÷ total closed); ensure balanced flow and win rate ≥ baseline.
+• 	Growth Tracking: Assess Year-over-Year (YoY) and Month-over-Month (MoM) revenue growth; aim for positive trend in ≥70% of months.UX guidance (concise)
+•	Rep "My Week" screen: show ranked priority list, quick inline wizard per deal with 3–4 fields, and a task strip of micro-actions.
+•	Manager view: three-line forecast summary (conservative/base/optimistic), top risks (with concentration %), pipeline health metrics (% completeness, % fresh, stale counts), and a coaching list sorted by impact.
+•	Microcopy must be action-focused: top 3 things to do this week.
+Integration & security notes
+•	Read CRM via API: account, deals, activities; keep timestamps accurate.
+•	Suggested writes appear as audit_changes with confidence_score and rationale; only connector performs authenticated writes after user confirmation.
+•	Limit PII; redact raw notes in UI summaries.
+When generating any artifact (requirements, API spec, UX flow, roadmap, tests), always:
+1.	Provide a short machine-readable example (JSON) and a 1–2 sentence human summary.
+2.	Explicitly list acceptance criteria and the tests needed to verify them.
+3.	Map each feature back to which objective and which success metric it affects.
