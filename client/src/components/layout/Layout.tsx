@@ -1,10 +1,54 @@
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, BarChart3, Settings, Bell, Search, CheckCircle2 } from "lucide-react";
+import { LayoutDashboard, Users, BarChart3, Settings, Bell, Search, CheckCircle2, Building2, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getDeals, getAccounts } from "@/lib/mockData";
 import logo from "@assets/generated_images/minimalist_geometric_logo_for_sales_buddy_crm.png";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    
+    const deals = getDeals().filter(d => d.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    const accounts = getAccounts().filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    setSearchResults([
+      ...accounts.map(a => ({ type: 'account', data: a })),
+      ...deals.map(d => ({ type: 'deal', data: d }))
+    ].slice(0, 6));
+  }, [searchQuery]);
+
+  const handleResultClick = (result: any) => {
+    if (result.type === 'account') {
+      setLocation('/accounts');
+    } else {
+      setLocation('/pipeline');
+    }
+    setShowResults(false);
+    setSearchQuery("");
+  };
 
   const navItems = [
     { href: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -62,13 +106,57 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Top Header */}
         <header className="h-16 border-b bg-background/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-10">
           <div className="flex items-center gap-4 w-full max-w-md">
-            <div className="relative w-full">
+            <div className="relative w-full" ref={searchRef}>
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search accounts, deals..."
                 className="w-full bg-muted/50 pl-9 pr-4 py-2 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowResults(true);
+                }}
+                onFocus={() => setShowResults(true)}
               />
+              
+              {/* Search Results Dropdown */}
+              {showResults && searchQuery.length >= 2 && (
+                <div className="absolute top-full left-0 w-full mt-2 bg-popover rounded-md border shadow-lg py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  {searchResults.length > 0 ? (
+                    <>
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Best Matches
+                      </div>
+                      {searchResults.map((result, idx) => (
+                        <button
+                          key={`${result.type}-${result.data.id}-${idx}`}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-3 transition-colors"
+                          onClick={() => handleResultClick(result)}
+                        >
+                          {result.type === 'account' ? (
+                            <Building2 className="w-4 h-4 text-blue-500 shrink-0" />
+                          ) : (
+                            <FileText className="w-4 h-4 text-green-500 shrink-0" />
+                          )}
+                          <div className="truncate">
+                            <div className="font-medium text-foreground">
+                              {result.type === 'account' ? result.data.name : result.data.title}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {result.type === 'account' ? 'Account' : `Deal • ${result.data.stage}`}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-muted-foreground text-center">
+                      No results found
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-4">
