@@ -132,6 +132,7 @@ const generateAnnualDeals = (): Deal[] => {
     ];
 
     let dealCounter = 1;
+    const usedTitles = new Set<string>();
 
     months.forEach(month => {
         // Add 2-4 deals per month
@@ -141,6 +142,12 @@ const generateAnnualDeals = (): Deal[] => {
             const template = dealTemplates[Math.floor(Math.random() * dealTemplates.length)];
             const account = ACCOUNTS[Math.floor(Math.random() * ACCOUNTS.length)];
             const owner = OWNERS[Math.floor(Math.random() * OWNERS.length)];
+            
+            const title = `${account.name} - ${template.title}`;
+            
+            // Skip if this exact deal title already exists to prevent duplicates
+            if (usedTitles.has(title)) continue;
+            usedTitles.add(title);
             
             // Random day within the month
             const closeDate = addDays(month, Math.floor(Math.random() * 25) + 1);

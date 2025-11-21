@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getDeals, Deal, updateDeal } from "@/lib/mockData";
+import { getDeals, Deal, updateDeal, addDeal, getAccounts } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Filter, Plus, Download, Search, Save } from "lucide-react";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Pipeline() {
@@ -18,21 +18,33 @@ export default function Pipeline() {
   const [stageFilter, setStageFilter] = useState<string>("ALL");
   const { toast } = useToast();
 
-  // Edit Dialog State
-  const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
+  // Edit/Add Dialog State
+  const [editingDeal, setEditingDeal] = useState<Partial<Deal> | null>(null);
+  const [isNewDeal, setIsNewDeal] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Deal>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const accounts = getAccounts();
 
   const handleEditClick = (deal: Deal) => {
+    setIsNewDeal(false);
     setEditingDeal(deal);
     setErrors({});
     setEditForm({
-      title: deal.title,
-      amount: deal.amount,
-      stage: deal.stage,
-      probability: deal.probability,
-      nextStep: deal.nextStep,
-      confidence: deal.confidence
+      ...deal
+    });
+  };
+
+  const handleAddClick = () => {
+    setIsNewDeal(true);
+    setEditingDeal({});
+    setErrors({});
+    setEditForm({
+      stage: "DISCOVERY",
+      confidence: "LOW",
+      probability: 20,
+      currency: "USD",
+      nextStepDate: addDays(new Date(), 7).toISOString(),
+      closeDate: addDays(new Date(), 30).toISOString(),
     });
   };
 
@@ -46,7 +58,15 @@ export default function Pipeline() {
     if (!editForm.title?.trim()) {
       newErrors.title = "Deal title is required";
       hasError = true;
+    } else {
+      // Check for duplicates
+      const duplicate = deals.find(d => d.title.toLowerCase() === editForm.title?.trim().toLowerCase() && d.id !== editingDeal.id);
+      if (duplicate) {
+        newErrors.title = "An opportunity with this name already exists";
+        hasError = true;
+      }
     }
+    
     if ((editForm.amount || 0) < 0) {
       newErrors.amount = "Amount cannot be negative";
       hasError = true;
@@ -55,18 +75,49 @@ export default function Pipeline() {
       newErrors.probability = "Probability must be between 0 and 100";
       hasError = true;
     }
+    
+    if (isNewDeal && !editForm.accountId) {
+        newErrors.accountId = "Account is required";
+        hasError = true;
+    }
 
     if (hasError) {
       setErrors(newErrors);
       return;
     }
 
-    const updated = updateDeal(editingDeal.id, editForm);
-    if (updated) {
-      setDeals(prev => prev.map(d => d.id === editingDeal.id ? updated : d));
-      toast({ title: "Success", description: "Opportunity updated successfully." });
-      setEditingDeal(null);
+    if (isNewDeal) {
+        const account = accounts.find(a => a.id === editForm.accountId);
+        const newDeal = addDeal({
+            id: `deal-new-${Date.now()}`,
+            accountId: editForm.accountId!,
+            ownerId: "user-1", // Default to current user
+            ownerName: "Alex Sales",
+            title: editForm.title!,
+            amount: editForm.amount || 0,
+            currency: "USD",
+            stage: editForm.stage as any,
+            confidence: editForm.confidence as any,
+            closeDate: editForm.closeDate || new Date().toISOString(),
+            lastActivityDate: new Date().toISOString(),
+            nextStep: editForm.nextStep || "Initial contact",
+            nextStepDate: editForm.nextStepDate || addDays(new Date(), 7).toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            probability: editForm.probability || 20,
+            activities: [],
+            notes: ""
+        });
+        setDeals([...deals, newDeal]);
+        toast({ title: "Success", description: "Opportunity created successfully." });
+    } else {
+        const updated = updateDeal(editingDeal.id!, editForm);
+        if (updated) {
+            setDeals(prev => prev.map(d => d.id === editingDeal.id ? updated : d));
+            toast({ title: "Success", description: "Opportunity updated successfully." });
+        }
     }
+    setEditingDeal(null);
   };
 
   const filteredDeals = deals.filter(deal => {
@@ -100,7 +151,7 @@ export default function Pipeline() {
             <Download className="w-4 h-4" />
             Export
           </Button>
-          <Button className="gap-2 shadow-sm">
+          <Button className="gap-2 shadow-sm" onClick={handleAddClick}>
             <Plus className="w-4 h-4" />
             Add Opportunity
           </Button>
@@ -204,12 +255,39 @@ export default function Pipeline() {
       <Dialog open={!!editingDeal} onOpenChange={(open) => !open && setEditingDeal(null)}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Edit Opportunity</DialogTitle>
-            <DialogDescription>Update details for {editingDeal?.title}</DialogDescription>
+            <DialogTitle>{isNewDeal ? "Add Opportunity" : "Edit Opportunity"}</DialogTitle>
+            <DialogDescription>{isNewDeal ? "Create a new sales opportunity" : `Update details for ${editingDeal?.title}`}</DialogDescription>
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+               {isNewDeal && (
+                  <div className="grid gap-2 mb-2">
+                    <Label htmlFor="account" className={errors.accountId ? "text-red-500" : ""}>Account</Label>
+                    <Select 
+                      value={editForm.accountId} 
+                      onValueChange={(val) => {
+                          setEditForm({...editForm, accountId: val});
+                          if (errors.accountId) {
+                              const newErrors = {...errors};
+                              delete newErrors.accountId;
+                              setErrors(newErrors);
+                          }
+                      }}
+                    >
+                      <SelectTrigger className={errors.accountId ? "border-red-500" : ""}>
+                        <SelectValue placeholder="Select account..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {accounts.map(acc => (
+                            <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.accountId && <span className="text-xs text-red-500">{errors.accountId}</span>}
+                  </div>
+               )}
+
               <div className="grid gap-2">
                 <Label htmlFor="title" className={errors.title ? "text-red-500" : ""}>Deal Title</Label>
                 <Input 
@@ -223,8 +301,10 @@ export default function Pipeline() {
                 />
                 {errors.title && <span className="text-xs text-red-500">{errors.title}</span>}
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="amount" className={errors.amount ? "text-red-500" : ""}>Amount ($)</Label>
+              
+              <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="amount" className={errors.amount ? "text-red-500" : ""}>Amount ($)</Label>
                 <Input 
                   id="amount" 
                   type="text" 
@@ -324,6 +404,7 @@ export default function Pipeline() {
               {errors.probability && <span className="text-xs text-red-500">{errors.probability}</span>}
             </div>
           </div>
+        </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingDeal(null)}>Cancel</Button>

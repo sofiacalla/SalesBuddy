@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getAccounts, getAccountDeals, addActivityToDeal, Account, Deal } from "@/lib/mockData";
+import { getAccounts, getAccountDeals, addActivityToDeal, addDeal, getDeals, Account, Deal } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -31,9 +31,83 @@ export default function Accounts() {
     dealId: ""
   });
 
+  // Add Deal State
+  const [isAddDealOpen, setIsAddDealOpen] = useState(false);
+  const [newDealForm, setNewDealForm] = useState<Partial<Deal>>({});
+  const [addDealErrors, setAddDealErrors] = useState<Record<string, string>>({});
+
   const handleAccountClick = (account: Account) => {
     setSelectedAccount(account);
     setDeals(getAccountDeals(account.id));
+  };
+
+  const handleAddDealClick = () => {
+      setNewDealForm({
+          stage: "DISCOVERY",
+          confidence: "LOW",
+          probability: 20,
+          amount: 0,
+          currency: "USD",
+          nextStepDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          closeDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+      setAddDealErrors({});
+      setIsAddDealOpen(true);
+  };
+
+  const handleSaveNewDeal = () => {
+      if (!selectedAccount) return;
+
+      const errors: Record<string, string> = {};
+      let hasError = false;
+
+      if (!newDealForm.title?.trim()) {
+          errors.title = "Deal title is required";
+          hasError = true;
+      } else {
+          // Check for global duplicates
+          const allDeals = getDeals();
+          const duplicate = allDeals.find(d => d.title.toLowerCase() === newDealForm.title?.trim().toLowerCase());
+          if (duplicate) {
+              errors.title = "An opportunity with this name already exists";
+              hasError = true;
+          }
+      }
+
+      if ((newDealForm.amount || 0) < 0) {
+          errors.amount = "Amount cannot be negative";
+          hasError = true;
+      }
+
+      if (hasError) {
+          setAddDealErrors(errors);
+          return;
+      }
+
+      const newDeal = addDeal({
+          id: `deal-new-${Date.now()}`,
+          accountId: selectedAccount.id,
+          ownerId: "user-1",
+          ownerName: "Alex Sales",
+          title: newDealForm.title!,
+          amount: newDealForm.amount || 0,
+          currency: "USD",
+          stage: newDealForm.stage as any,
+          confidence: newDealForm.confidence as any,
+          closeDate: newDealForm.closeDate!,
+          lastActivityDate: new Date().toISOString(),
+          nextStep: newDealForm.nextStep || "Initial contact",
+          nextStepDate: newDealForm.nextStepDate!,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          probability: newDealForm.probability || 20,
+          activities: [],
+          notes: ""
+      });
+
+      setDeals([...deals, newDeal]);
+      toast({ title: "Success", description: "Opportunity added successfully." });
+      setIsAddDealOpen(false);
   };
 
   const handleLogActivity = () => {
@@ -181,7 +255,7 @@ export default function Accounts() {
             <div className="md:col-span-2 space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Open Opportunities</h4>
-                <Button size="sm" variant="ghost" className="h-8 text-primary hover:text-primary/80">
+                <Button size="sm" variant="ghost" className="h-8 text-primary hover:text-primary/80" onClick={handleAddDealClick}>
                   <Plus className="w-3 h-3 mr-1" /> Add Deal
                 </Button>
               </div>
@@ -325,6 +399,74 @@ export default function Accounts() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsActivityOpen(false)}>Cancel</Button>
             <Button onClick={handleLogActivity}>Save Activity</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Deal Dialog */}
+      <Dialog open={isAddDealOpen} onOpenChange={setIsAddDealOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add New Opportunity</DialogTitle>
+            <DialogDescription>Create a new deal for {selectedAccount?.name}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="new-title" className={addDealErrors.title ? "text-red-500" : ""}>Deal Title</Label>
+                <Input 
+                  id="new-title" 
+                  value={newDealForm.title || ""} 
+                  onChange={(e) => {
+                    setNewDealForm({...newDealForm, title: e.target.value});
+                    if (addDealErrors.title) setAddDealErrors({...addDealErrors, title: ""});
+                  }}
+                  className={addDealErrors.title ? "border-red-500 focus-visible:ring-red-500" : ""}
+                  placeholder="e.g. Q4 Expansion"
+                />
+                {addDealErrors.title && <span className="text-xs text-red-500">{addDealErrors.title}</span>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="new-amount">Amount ($)</Label>
+                    <Input 
+                      id="new-amount" 
+                      type="number"
+                      value={newDealForm.amount || 0} 
+                      onChange={(e) => setNewDealForm({...newDealForm, amount: Number(e.target.value)})}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="new-stage">Stage</Label>
+                    <Select 
+                      value={newDealForm.stage} 
+                      onValueChange={(val: any) => setNewDealForm({...newDealForm, stage: val})}
+                    >
+                      <SelectTrigger id="new-stage">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="DISCOVERY">Discovery</SelectItem>
+                        <SelectItem value="PROPOSAL">Proposal</SelectItem>
+                        <SelectItem value="NEGOTIATION">Negotiation</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="new-nextStep">Next Step</Label>
+                <Input 
+                  id="new-nextStep" 
+                  value={newDealForm.nextStep || ""} 
+                  onChange={(e) => setNewDealForm({...newDealForm, nextStep: e.target.value})}
+                  placeholder="e.g. Schedule demo"
+                />
+              </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddDealOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveNewDeal}>Create Opportunity</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
