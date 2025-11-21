@@ -93,8 +93,8 @@ export default function RepMyWeek() {
                   )}
                   onClick={() => setSelectedDealId(deal.id)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
+                  <CardContent className="p-5">
+                    <div className="flex justify-between items-start mb-3">
                       <Badge variant="outline" className="text-xs font-normal text-muted-foreground">
                         #{index + 1} Priority
                       </Badge>
@@ -104,11 +104,11 @@ export default function RepMyWeek() {
                         </div>
                       )}
                     </div>
-                    <h4 className="font-bold text-base truncate">{deal.title}</h4>
-                    <p className="text-sm text-muted-foreground truncate">{deal.ownerName}</p>
-                    <div className="mt-3 flex justify-between items-center text-sm">
-                      <span className="font-mono font-medium">${deal.amount.toLocaleString()}</span>
-                      <span className="text-xs bg-secondary px-2 py-1 rounded-full">{deal.stage}</span>
+                    <h4 className="font-bold text-lg leading-tight mb-1">{deal.title}</h4>
+                    <p className="text-sm text-muted-foreground mb-3">{deal.ownerName}</p>
+                    <div className="flex justify-between items-center text-sm mt-auto">
+                      <span className="font-mono font-medium text-base">${deal.amount.toLocaleString()}</span>
+                      <span className="text-xs bg-secondary px-2.5 py-1 rounded-full font-medium">{deal.stage}</span>
                     </div>
                   </CardContent>
                 </Card>
