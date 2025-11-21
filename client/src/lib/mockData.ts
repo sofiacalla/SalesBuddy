@@ -23,6 +23,14 @@ export interface Account {
   avatar?: string;
 }
 
+// Activity Log structure
+export interface Activity {
+  id: string;
+  type: "call" | "email" | "meeting" | "linkedin" | "note";
+  notes: string;
+  date: string; // ISO Date
+}
+
 // Deal information structure
 export interface Deal {
   id: string;
@@ -42,6 +50,7 @@ export interface Deal {
   updatedAt: string;
   notes?: string;
   probability: number; // 0-100
+  activities: Activity[];
 }
 
 // Historical revenue data for MAPE calculation
@@ -174,7 +183,15 @@ const generateAnnualDeals = (): Deal[] => {
                 nextStepDate: addDays(now, 3).toISOString(),
                 createdAt: subDays(closeDate, 60).toISOString(),
                 updatedAt: subDays(now, 2).toISOString(),
-                probability: probability
+                probability: probability,
+                activities: [
+                  {
+                    id: `act-${dealCounter}-${Date.now()}`,
+                    type: "note",
+                    notes: "Initial deal creation",
+                    date: subDays(now, 10).toISOString()
+                  }
+                ]
             });
         }
         
@@ -182,65 +199,67 @@ const generateAnnualDeals = (): Deal[] => {
         const forceAccount = ACCOUNTS[Math.floor(Math.random() * ACCOUNTS.length)];
         const forceOwner = OWNERS[Math.floor(Math.random() * OWNERS.length)];
         
-        // 1. Force Uncommitted (Low Confidence)
-        deals.push({
-            id: `deal-forced-uncommitted-${dealCounter++}`,
-            accountId: forceAccount.id,
-            ownerId: forceOwner.id,
-            ownerName: forceOwner.name,
-            title: `${forceAccount.name} - Upside Opportunity`,
-            amount: 150000 + Math.floor(Math.random() * 100000),
-            currency: "USD",
-            stage: "DISCOVERY",
-            confidence: "LOW",
-            closeDate: addDays(month, 15).toISOString(),
-            lastActivityDate: subDays(now, 5).toISOString(),
-            nextStep: "Initial review",
-            nextStepDate: addDays(now, 5).toISOString(),
-            createdAt: subDays(month, 30).toISOString(),
-            updatedAt: subDays(now, 5).toISOString(),
-            probability: 25
-        });
+            deals.push({
+                id: `deal-forced-uncommitted-${dealCounter++}`,
+                accountId: forceAccount.id,
+                ownerId: forceOwner.id,
+                ownerName: forceOwner.name,
+                title: `${forceAccount.name} - Upside Opportunity`,
+                amount: 150000 + Math.floor(Math.random() * 100000),
+                currency: "USD",
+                stage: "DISCOVERY",
+                confidence: "LOW",
+                closeDate: addDays(month, 15).toISOString(),
+                lastActivityDate: subDays(now, 5).toISOString(),
+                nextStep: "Initial review",
+                nextStepDate: addDays(now, 5).toISOString(),
+                createdAt: subDays(month, 30).toISOString(),
+                updatedAt: subDays(now, 5).toISOString(),
+                probability: 25,
+                activities: []
+            });
 
-        // 2. Force Committed (High/Medium Confidence)
-        deals.push({
-            id: `deal-forced-committed-${dealCounter++}`,
-            accountId: forceAccount.id,
-            ownerId: forceOwner.id,
-            ownerName: forceOwner.name,
-            title: `${forceAccount.name} - Committed Renewal`,
-            amount: 200000 + Math.floor(Math.random() * 100000),
-            currency: "USD",
-            stage: "NEGOTIATION",
-            confidence: "HIGH",
-            closeDate: addDays(month, 20).toISOString(),
-            lastActivityDate: subDays(now, 2).toISOString(),
-            nextStep: "Final Sign-off",
-            nextStepDate: addDays(now, 2).toISOString(),
-            createdAt: subDays(month, 60).toISOString(),
-            updatedAt: subDays(now, 2).toISOString(),
-            probability: 90
-        });
+            // 2. Force Committed (High/Medium Confidence)
+            deals.push({
+                id: `deal-forced-committed-${dealCounter++}`,
+                accountId: forceAccount.id,
+                ownerId: forceOwner.id,
+                ownerName: forceOwner.name,
+                title: `${forceAccount.name} - Committed Renewal`,
+                amount: 200000 + Math.floor(Math.random() * 100000),
+                currency: "USD",
+                stage: "NEGOTIATION",
+                confidence: "HIGH",
+                closeDate: addDays(month, 20).toISOString(),
+                lastActivityDate: subDays(now, 2).toISOString(),
+                nextStep: "Final Sign-off",
+                nextStepDate: addDays(now, 2).toISOString(),
+                createdAt: subDays(month, 60).toISOString(),
+                updatedAt: subDays(now, 2).toISOString(),
+                probability: 90,
+                activities: []
+            });
 
-        // 3. Force Closed Won (Actuals)
-        deals.push({
-            id: `deal-forced-won-${dealCounter++}`,
-            accountId: forceAccount.id,
-            ownerId: forceOwner.id,
-            ownerName: forceOwner.name,
-            title: `${forceAccount.name} - Strategic Win`,
-            amount: 100000 + Math.floor(Math.random() * 50000),
-            currency: "USD",
-            stage: "CLOSED_WON",
-            confidence: "HIGH",
-            closeDate: addDays(month, 10).toISOString(),
-            lastActivityDate: subDays(now, 15).toISOString(),
-            nextStep: "Onboarding",
-            nextStepDate: addDays(now, 15).toISOString(),
-            createdAt: subDays(month, 90).toISOString(),
-            updatedAt: subDays(month, 5).toISOString(),
-            probability: 100
-        });
+            // 3. Force Closed Won (Actuals)
+            deals.push({
+                id: `deal-forced-won-${dealCounter++}`,
+                accountId: forceAccount.id,
+                ownerId: forceOwner.id,
+                ownerName: forceOwner.name,
+                title: `${forceAccount.name} - Strategic Win`,
+                amount: 100000 + Math.floor(Math.random() * 50000),
+                currency: "USD",
+                stage: "CLOSED_WON",
+                confidence: "HIGH",
+                closeDate: addDays(month, 10).toISOString(),
+                lastActivityDate: subDays(now, 15).toISOString(),
+                nextStep: "Onboarding",
+                nextStepDate: addDays(now, 15).toISOString(),
+                createdAt: subDays(month, 90).toISOString(),
+                updatedAt: subDays(month, 5).toISOString(),
+                probability: 100,
+                activities: []
+            });
     });
     
     return deals;
@@ -267,6 +286,14 @@ const DEALS: Deal[] = [
     createdAt: subDays(new Date(), 45).toISOString(),
     updatedAt: subDays(new Date(), 2).toISOString(),
     probability: 85,
+    activities: [
+      {
+        id: "act-spec-1",
+        type: "note",
+        notes: "Deal created manually",
+        date: subDays(new Date(), 45).toISOString()
+      }
+    ]
   }
 ];
 
@@ -293,6 +320,24 @@ export const updateDeal = (id: string, updates: Partial<Deal>) => {
     const index = DEALS.findIndex(d => d.id === id);
     if (index !== -1) {
         DEALS[index] = { ...DEALS[index], ...updates, updatedAt: new Date().toISOString() };
+        return DEALS[index];
+    }
+    return null;
+};
+
+export const addActivityToDeal = (dealId: string, activity: Omit<Activity, "id" | "date">) => {
+    const index = DEALS.findIndex(d => d.id === dealId);
+    if (index !== -1) {
+        const newActivity: Activity = {
+            ...activity,
+            id: `act-${Date.now()}`,
+            date: new Date().toISOString()
+        };
+        if (!DEALS[index].activities) {
+            DEALS[index].activities = [];
+        }
+        DEALS[index].activities.unshift(newActivity);
+        DEALS[index].updatedAt = new Date().toISOString();
         return DEALS[index];
     }
     return null;

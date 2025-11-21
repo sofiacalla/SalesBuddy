@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getAccounts, getAccountDeals, Account, Deal } from "@/lib/mockData";
+import { getAccounts, getAccountDeals, addActivityToDeal, Account, Deal } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, Building2, Plus, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Phone, Mail, Building2, Plus, ExternalLink, CheckCircle2, StickyNote, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,13 +16,19 @@ export default function Accounts() {
   const accounts = getAccounts();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [deals, setDeals] = useState<Deal[]>([]);
+  const [selectedDealForHistory, setSelectedDealForHistory] = useState<Deal | null>(null);
   const { toast } = useToast();
 
   // Activity Log State
   const [isActivityOpen, setIsActivityOpen] = useState(false);
-  const [activityForm, setActivityForm] = useState({
+  const [activityForm, setActivityForm] = useState<{
+    type: string;
+    notes: string;
+    dealId: string;
+  }>({
     type: "",
-    notes: ""
+    notes: "",
+    dealId: ""
   });
 
   const handleAccountClick = (account: Account) => {
@@ -48,15 +54,33 @@ export default function Accounts() {
       });
       return;
     }
+    if (!activityForm.dealId) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a related opportunity.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    // Simulate API call
-    toast({
-      title: "Activity Logged",
-      description: "The activity has been recorded successfully.",
+    // Save Activity
+    const updatedDeal = addActivityToDeal(activityForm.dealId, {
+      type: activityForm.type as any,
+      notes: activityForm.notes
     });
-    
-    setIsActivityOpen(false);
-    setActivityForm({ type: "", notes: "" });
+
+    if (updatedDeal) {
+      // Update local state
+      setDeals(prev => prev.map(d => d.id === updatedDeal.id ? updatedDeal : d));
+      
+      toast({
+        title: "Activity Logged",
+        description: "The activity has been recorded successfully.",
+      });
+      
+      setIsActivityOpen(false);
+      setActivityForm({ type: "", notes: "", dealId: "" });
+    }
   };
 
   const formatCurrency = (val: number) => 
@@ -167,9 +191,13 @@ export default function Accounts() {
                   <p className="text-muted-foreground">No active deals found.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                   {deals.map(deal => (
-                    <div key={deal.id} className="p-4 border rounded-lg bg-card hover:shadow-sm transition-all relative group">
+                    <div 
+                      key={deal.id} 
+                      className="p-4 border rounded-lg bg-card hover:shadow-sm transition-all relative group cursor-pointer"
+                      onClick={() => setSelectedDealForHistory(deal)}
+                    >
                       <div className="flex justify-between items-start mb-2">
                         <h5 className="font-bold text-base">{deal.title}</h5>
                         <span className="font-mono font-bold text-primary">{formatCurrency(deal.amount)}</span>
@@ -187,6 +215,12 @@ export default function Accounts() {
                           <span>Next: <span className="text-foreground font-medium">{deal.nextStep}</span></span>
                           <span className="text-xs">{format(new Date(deal.nextStepDate), 'MMM d')}</span>
                         </div>
+                        {deal.activities && deal.activities.length > 0 && (
+                          <div className="mt-2 pt-2 border-t border-dashed text-xs flex items-center gap-1 text-blue-600">
+                            <MessageSquare className="w-3 h-3" />
+                            Last activity: {deal.activities[0].type} on {format(new Date(deal.activities[0].date), 'MMM d')}
+                          </div>
+                        )}
                       </div>
                       
                       <Button size="icon" variant="ghost" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6">
@@ -197,6 +231,39 @@ export default function Accounts() {
                 </div>
               )}
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Deal History Dialog */}
+      <Dialog open={!!selectedDealForHistory} onOpenChange={(open) => !open && setSelectedDealForHistory(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Activity History</DialogTitle>
+            <DialogDescription>{selectedDealForHistory?.title}</DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-4 max-h-[400px] overflow-y-auto pr-2">
+            {selectedDealForHistory?.activities?.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No activity logged yet.</p>
+            ) : (
+              selectedDealForHistory?.activities?.map((activity) => (
+                <div key={activity.id} className="flex gap-3 text-sm border-b pb-3 last:border-0">
+                  <div className="mt-0.5">
+                    {activity.type === 'call' ? <Phone className="w-4 h-4 text-blue-500" /> : 
+                     activity.type === 'email' ? <Mail className="w-4 h-4 text-purple-500" /> :
+                     activity.type === 'note' ? <StickyNote className="w-4 h-4 text-yellow-500" /> :
+                     <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between mb-1">
+                      <span className="font-semibold capitalize">{activity.type}</span>
+                      <span className="text-xs text-muted-foreground">{format(new Date(activity.date), 'MMM d, h:mm a')}</span>
+                    </div>
+                    <p className="text-muted-foreground">{activity.notes}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -212,6 +279,22 @@ export default function Accounts() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
+              <Label htmlFor="deal">Related Opportunity</Label>
+              <Select 
+                value={activityForm.dealId} 
+                onValueChange={(val) => setActivityForm({...activityForm, dealId: val})}
+              >
+                <SelectTrigger id="deal">
+                  <SelectValue placeholder="Select deal..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {deals.map(deal => (
+                    <SelectItem key={deal.id} value={deal.id}>{deal.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="type">Activity Type</Label>
               <Select 
                 value={activityForm.type} 
@@ -225,6 +308,7 @@ export default function Accounts() {
                   <SelectItem value="email">Email</SelectItem>
                   <SelectItem value="meeting">Meeting</SelectItem>
                   <SelectItem value="linkedin">LinkedIn Message</SelectItem>
+                  <SelectItem value="note">General Note</SelectItem>
                 </SelectContent>
               </Select>
             </div>
