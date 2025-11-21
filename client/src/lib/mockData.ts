@@ -1,4 +1,4 @@
-import { addDays, subDays, subMonths } from "date-fns";
+import { addDays, subDays, subMonths, addMonths, format } from "date-fns";
 
 /**
  * Types for the Sales Buddy CRM
@@ -71,15 +71,35 @@ const OWNERS = [
   { id: "user-2", name: "Jordan Closer" },
 ];
 
-// Historical data for growth and reliability tracking
-const HISTORICAL_REVENUE: HistoricalRevenue[] = [
-  { month: "2024-08", forecasted: 850000, actual: 820000 },
-  { month: "2024-09", forecasted: 900000, actual: 950000 },
-  { month: "2024-10", forecasted: 920000, actual: 880000 },
-  { month: "2024-11", forecasted: 950000, actual: 980000 },
-  { month: "2024-12", forecasted: 1100000, actual: 1050000 },
-  { month: "2025-01", forecasted: 980000, actual: 1020000 }, // Last month
-];
+// Helper to generate dynamic historical data so it always looks fresh relative to "now"
+const generateHistory = (): HistoricalRevenue[] => {
+    const history: HistoricalRevenue[] = [];
+    const now = new Date();
+    
+    // Generate last 12 months of history
+    for (let i = 12; i >= 1; i--) {
+        const date = subMonths(now, i);
+        const monthStr = format(date, 'yyyy-MM');
+        
+        // Create some variance for realistic data
+        // Q4 usually higher
+        const isQ4 = date.getMonth() >= 9; // Oct, Nov, Dec
+        const baseAmount = 800000 + (isQ4 ? 200000 : 0); 
+        const randomVariance = Math.floor(Math.random() * 100000) - 50000;
+        
+        // Forecast error simulation
+        const forecastError = Math.floor(Math.random() * 150000) - 75000;
+
+        history.push({
+            month: monthStr,
+            forecasted: baseAmount + randomVariance + forecastError,
+            actual: baseAmount + randomVariance
+        });
+    }
+    return history;
+};
+
+const HISTORICAL_REVENUE = generateHistory();
 
 const DEALS: Deal[] = [
   {
@@ -190,7 +210,7 @@ const DEALS: Deal[] = [
     updatedAt: subDays(new Date(), 0).toISOString(),
     probability: 90,
   },
-  // Add more deals for future months to enable filtering
+  // Future Deals (Next Month)
   {
     id: "deal-7",
     accountId: "acc-6",
@@ -244,6 +264,43 @@ const DEALS: Deal[] = [
     createdAt: subDays(new Date(), 30).toISOString(),
     updatedAt: subDays(new Date(), 1).toISOString(),
     probability: 95,
+  },
+   // Last Month Deals (Simulated Closed Won history or slipped deals)
+  {
+    id: "deal-10",
+    accountId: "acc-2",
+    ownerId: "user-1",
+    ownerName: "Alex Sales",
+    title: "Q1 Initial Pilot",
+    amount: 80000,
+    currency: "USD",
+    stage: "CLOSED_WON",
+    confidence: "HIGH",
+    closeDate: subMonths(new Date(), 1).toISOString(),
+    lastActivityDate: subMonths(new Date(), 1).toISOString(),
+    nextStep: "Deployment",
+    nextStepDate: subMonths(new Date(), 1).toISOString(),
+    createdAt: subMonths(new Date(), 3).toISOString(),
+    updatedAt: subMonths(new Date(), 1).toISOString(),
+    probability: 100,
+  },
+  {
+    id: "deal-11",
+    accountId: "acc-5",
+    ownerId: "user-2",
+    ownerName: "Jordan Closer",
+    title: "Previous Consulting Engagement",
+    amount: 45000,
+    currency: "USD",
+    stage: "CLOSED_WON",
+    confidence: "HIGH",
+    closeDate: subMonths(new Date(), 1).toISOString(),
+    lastActivityDate: subMonths(new Date(), 1).toISOString(),
+    nextStep: "Complete",
+    nextStepDate: subMonths(new Date(), 1).toISOString(),
+    createdAt: subMonths(new Date(), 2).toISOString(),
+    updatedAt: subMonths(new Date(), 1).toISOString(),
+    probability: 100,
   }
 ];
 

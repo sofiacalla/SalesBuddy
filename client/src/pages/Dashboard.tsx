@@ -2,11 +2,17 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getDeals, getHistoricalRevenue } from "@/lib/mockData";
 import { calculateForecast, isDealStale, getConcentrationRisk } from "@/lib/forecastUtils";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from "recharts";
-import { ArrowUpRight, AlertTriangle, CheckCircle2, TrendingUp, Calendar, Target, Activity, Percent, Users } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from "recharts";
+import { ArrowUpRight, AlertTriangle, CheckCircle2, TrendingUp, Calendar, Target, Activity, Percent, Users, Info } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, addMonths, subMonths } from "date-fns";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 /**
  * Manager Dashboard Page
@@ -45,6 +51,7 @@ export default function Dashboard() {
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
 
   return (
+    <TooltipProvider>
     <div className="space-y-8">
       {/* Header & Filters */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -69,7 +76,7 @@ export default function Dashboard() {
 
       {/* Top Level Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-primary/5 border-primary/20">
+        <Card className="bg-primary/5 border-primary/20 relative group">
           <CardHeader className="pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-primary uppercase tracking-wider flex justify-between">
               Forecast Reliability
@@ -79,10 +86,20 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.mape.toFixed(1)}% MAPE</div>
             <p className="text-xs text-muted-foreground mt-1">Target: &lt;15% Error</p>
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-muted-foreground/50 hover:text-primary" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">Mean Absolute Percentage Error between predicted vs. actual monthly revenue.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative group">
           <CardHeader className="pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex justify-between">
               Pipeline Hygiene
@@ -94,10 +111,20 @@ export default function Dashboard() {
               {metrics.hygieneScore.toFixed(0)}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">Target: &ge;90% Complete</p>
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-muted-foreground/50 hover:text-primary" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">% of active deals with all required fields completed (Stage, Confidence, Next Step, Amount).</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative group">
           <CardHeader className="pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex justify-between">
               Win Rate
@@ -107,10 +134,20 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{metrics.winRate.toFixed(0)}%</div>
             <p className="text-xs text-muted-foreground mt-1">Balanced flow</p>
+             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-muted-foreground/50 hover:text-primary" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">Percentage of closed deals that were Won vs Lost.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative group">
           <CardHeader className="pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex justify-between">
               MoM Growth
@@ -122,37 +159,77 @@ export default function Dashboard() {
               {metrics.momGrowth > 0 ? "+" : ""}{metrics.momGrowth.toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">vs. Last Month</p>
+             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-muted-foreground/50 hover:text-primary" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">Month-over-Month revenue growth comparing current actuals/forecast to previous month.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* 3-Line Forecast Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-l-4 border-l-green-500 shadow-sm">
+        <Card className="border-l-4 border-l-green-500 shadow-sm relative group">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Conservative</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">{formatCurrency(metrics.conservative)}</div>
             <p className="text-xs text-muted-foreground mt-1">Locked-in revenue</p>
+             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-muted-foreground/50 hover:text-primary" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">High Confidence deals closing within 14 days + already Closed Won.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-blue-500 shadow-sm bg-blue-50/50">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm bg-blue-50/50 relative group">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-blue-700">Base Forecast</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-700">{formatCurrency(metrics.base)}</div>
             <p className="text-xs text-blue-600/80 mt-1">Most likely outcome</p>
+             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-blue-700/50 hover:text-blue-900" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">High & Medium Confidence deals closing within 30 days.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-orange-500 shadow-sm">
+        <Card className="border-l-4 border-l-orange-500 shadow-sm relative group">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Optimistic</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">{formatCurrency(metrics.optimistic)}</div>
             <p className="text-xs text-muted-foreground mt-1">Upside potential</p>
+             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-muted-foreground/50 hover:text-primary" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">Base + Low Confidence deals + Early stage high value deals.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -169,7 +246,7 @@ export default function Dashboard() {
               <BarChart data={forecastData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
                 <XAxis type="number" hide />
                 <YAxis dataKey="name" type="category" width={100} tickLine={false} axisLine={false} fontSize={12} />
-                <Tooltip 
+                <RechartsTooltip 
                   cursor={{ fill: 'transparent' }}
                   formatter={(value: number) => [formatCurrency(value), "Value"]}
                 />
@@ -194,7 +271,7 @@ export default function Dashboard() {
               <LineChart data={trendData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} />
                 <YAxis tickFormatter={(val) => `$${val/1000}k`} tickLine={false} axisLine={false} fontSize={12} />
-                <Tooltip formatter={(value: number) => [formatCurrency(value), "Revenue"]} />
+                <RechartsTooltip formatter={(value: number) => [formatCurrency(value), "Revenue"]} />
                 <Legend />
                 <Line type="monotone" dataKey="Forecast" stroke="hsl(var(--muted-foreground))" strokeDasharray="5 5" strokeWidth={2} />
                 <Line type="monotone" dataKey="Actual" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4 }} />
@@ -282,6 +359,8 @@ export default function Dashboard() {
         </Card>
       </div>
     </div>
+    </TooltipProvider>
   );
 }
+
 
