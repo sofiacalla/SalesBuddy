@@ -21,9 +21,11 @@ export default function Pipeline() {
   // Edit Dialog State
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
   const [editForm, setEditForm] = useState<Partial<Deal>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleEditClick = (deal: Deal) => {
     setEditingDeal(deal);
+    setErrors({});
     setEditForm({
       title: deal.title,
       amount: deal.amount,
@@ -36,18 +38,26 @@ export default function Pipeline() {
 
   const handleSaveDeal = () => {
     if (!editingDeal) return;
+    
+    const newErrors: Record<string, string> = {};
+    let hasError = false;
 
     // Validation
     if (!editForm.title?.trim()) {
-      toast({ title: "Validation Error", description: "Deal title is required", variant: "destructive" });
-      return;
+      newErrors.title = "Deal title is required";
+      hasError = true;
     }
     if ((editForm.amount || 0) < 0) {
-      toast({ title: "Validation Error", description: "Amount cannot be negative", variant: "destructive" });
-      return;
+      newErrors.amount = "Amount cannot be negative";
+      hasError = true;
     }
     if ((editForm.probability || 0) < 0 || (editForm.probability || 0) > 100) {
-      toast({ title: "Validation Error", description: "Probability must be between 0 and 100", variant: "destructive" });
+      newErrors.probability = "Probability must be between 0 and 100";
+      hasError = true;
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
       return;
     }
 
@@ -201,21 +211,31 @@ export default function Pipeline() {
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="title">Deal Title</Label>
+                <Label htmlFor="title" className={errors.title ? "text-red-500" : ""}>Deal Title</Label>
                 <Input 
                   id="title" 
                   value={editForm.title || ""} 
-                  onChange={(e) => setEditForm({...editForm, title: e.target.value})} 
+                  onChange={(e) => {
+                    setEditForm({...editForm, title: e.target.value});
+                    if (errors.title) setErrors({...errors, title: ""});
+                  }}
+                  className={errors.title ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
+                {errors.title && <span className="text-xs text-red-500">{errors.title}</span>}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="amount">Amount ($)</Label>
+                <Label htmlFor="amount" className={errors.amount ? "text-red-500" : ""}>Amount ($)</Label>
                 <Input 
                   id="amount" 
                   type="number" 
                   value={editForm.amount || 0} 
-                  onChange={(e) => setEditForm({...editForm, amount: Number(e.target.value)})} 
+                  onChange={(e) => {
+                    setEditForm({...editForm, amount: Number(e.target.value)});
+                    if (errors.amount) setErrors({...errors, amount: ""});
+                  }}
+                  className={errors.amount ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
+                {errors.amount && <span className="text-xs text-red-500">{errors.amount}</span>}
               </div>
             </div>
 
@@ -267,7 +287,7 @@ export default function Pipeline() {
 
             <div className="grid gap-2">
               <div className="flex justify-between">
-                <Label htmlFor="probability">Probability (%)</Label>
+                <Label htmlFor="probability" className={errors.probability ? "text-red-500" : ""}>Probability (%)</Label>
                 <span className="text-xs text-muted-foreground">{editForm.probability}%</span>
               </div>
               <Input 
@@ -276,8 +296,13 @@ export default function Pipeline() {
                 min="0" 
                 max="100" 
                 value={editForm.probability || 0} 
-                onChange={(e) => setEditForm({...editForm, probability: Number(e.target.value)})} 
+                onChange={(e) => {
+                  setEditForm({...editForm, probability: Number(e.target.value)});
+                  if (errors.probability) setErrors({...errors, probability: ""});
+                }}
+                className={errors.probability ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.probability && <span className="text-xs text-red-500">{errors.probability}</span>}
             </div>
           </div>
 
