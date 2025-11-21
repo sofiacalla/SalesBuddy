@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getDeals, updateDeal, Deal } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle2, Calendar as CalendarIcon, AlertCircle, ArrowRight, Save } from "lucide-react";
 import { format, differenceInDays, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * Rep "My Week" Page
@@ -20,6 +21,25 @@ import { cn } from "@/lib/utils";
 export default function RepMyWeek() {
   const [deals, setDeals] = useState(getDeals());
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  // Local state for form fields to allow editing before saving
+  const [formData, setFormData] = useState<Partial<Deal>>({});
+
+  useEffect(() => {
+    if (selectedDealId) {
+      const deal = deals.find(d => d.id === selectedDealId);
+      if (deal) {
+        setFormData({
+          nextStep: deal.nextStep,
+          nextStepDate: deal.nextStepDate,
+          confidence: deal.confidence,
+          stage: deal.stage,
+          notes: deal.notes || ""
+        });
+      }
+    }
+  }, [selectedDealId, deals]);
 
   // Sort deals by priority: Stale > High Value > Closing Soon
   const priorityDeals = [...deals].sort((a, b) => {
@@ -34,11 +54,17 @@ export default function RepMyWeek() {
 
   const selectedDeal = deals.find(d => d.id === selectedDealId);
 
-  const handleSaveUpdate = (id: string, updates: Partial<Deal>) => {
-    const updated = updateDeal(id, updates);
+  const handleSaveUpdate = () => {
+    if (!selectedDealId) return;
+
+    const updated = updateDeal(selectedDealId, formData);
     if (updated) {
-      setDeals(prev => prev.map(d => d.id === id ? updated : d));
-      // Optional: Clear selection or show success toast
+      setDeals(prev => prev.map(d => d.id === selectedDealId ? updated : d));
+      toast({
+        title: "Deal Updated",
+        description: "Your changes have been saved successfully.",
+        duration: 3000,
+      });
     }
   };
 
@@ -52,8 +78,8 @@ export default function RepMyWeek() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Priority List */}
         <div className="lg:col-span-1 space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Priority Actions</h3>
-          <div className="space-y-3">
+          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Deals Requiring Attention</h3>
+          <div className="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
             {priorityDeals.map((deal, index) => {
               const isStale = differenceInDays(new Date(), parseISO(deal.lastActivityDate)) > 7;
               
@@ -125,7 +151,8 @@ export default function RepMyWeek() {
                     <div className="grid gap-2">
                       <label className="text-sm font-medium">What needs to happen next?</label>
                       <Input 
-                        defaultValue={selectedDeal.nextStep} 
+                        value={formData.nextStep || ""}
+                        onChange={(e) => setFormData({...formData, nextStep: e.target.value})}
                         placeholder="E.g., Send final contract for review"
                       />
                     </div>
@@ -135,11 +162,15 @@ export default function RepMyWeek() {
                         <PopoverTrigger asChild>
                           <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {format(parseISO(selectedDeal.nextStepDate), "PPP")}
+                            {formData.nextStepDate ? format(parseISO(formData.nextStepDate), "PPP") : "Pick a date"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
-                          <Calendar mode="single" selected={parseISO(selectedDeal.nextStepDate)} />
+                          <Calendar 
+                            mode="single" 
+                            selected={formData.nextStepDate ? parseISO(formData.nextStepDate) : undefined}
+                            onSelect={(date) => setFormData({...formData, nextStepDate: date?.toISOString()})}
+                          />
                         </PopoverContent>
                       </Popover>
                     </div>
@@ -155,7 +186,10 @@ export default function RepMyWeek() {
                   <div className="grid grid-cols-2 gap-4 pl-8">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Confidence Level</label>
-                      <Select defaultValue={selectedDeal.confidence}>
+                      <Select 
+                        value={formData.confidence} 
+                        onValueChange={(val: any) => setFormData({...formData, confidence: val})}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -168,7 +202,10 @@ export default function RepMyWeek() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Stage</label>
-                       <Select defaultValue={selectedDeal.stage}>
+                       <Select 
+                         value={formData.stage} 
+                         onValueChange={(val: any) => setFormData({...formData, stage: val})}
+                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -190,12 +227,17 @@ export default function RepMyWeek() {
                     Latest Notes
                   </div>
                   <div className="pl-8">
-                    <Textarea placeholder="Log call notes or specific blockers..." className="min-h-[100px]" />
+                    <Textarea 
+                      value={formData.notes || ""}
+                      onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                      placeholder="Log call notes or specific blockers..." 
+                      className="min-h-[100px]" 
+                    />
                   </div>
                 </div>
 
                 <div className="flex justify-end pt-4 border-t">
-                  <Button className="gap-2 w-full md:w-auto">
+                  <Button className="gap-2 w-full md:w-auto" onClick={handleSaveUpdate}>
                     <Save className="w-4 h-4" />
                     Save Update
                   </Button>

@@ -5,7 +5,7 @@ import { calculateForecast, isDealStale, getConcentrationRisk } from "@/lib/fore
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from "recharts";
 import { ArrowUpRight, AlertTriangle, CheckCircle2, TrendingUp, Calendar, Target, Activity, Percent, Users, Info, Sparkles, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format, addMonths, subMonths, eachMonthOfInterval, startOfYear, endOfYear } from "date-fns";
+import { format, addMonths, subMonths, eachMonthOfInterval, startOfYear, endOfYear, differenceInDays, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -330,11 +330,19 @@ export default function Dashboard() {
               </div>
             )}
             {metrics.freshnessScore < 80 && (
-              <div className="flex items-start gap-3 p-3 bg-white rounded-md border border-yellow-100 shadow-sm cursor-default">
+              <div 
+                className="flex items-start gap-3 p-3 bg-white rounded-md border border-yellow-100 shadow-sm cursor-pointer hover:shadow-md transition-all"
+                onClick={() => setSelectedRisk({
+                  type: "Freshness",
+                  title: `Low Freshness (${metrics.freshnessScore.toFixed(0)}%)`,
+                  desc: "Target is 80%. The following deals have not been updated in the last 7 days.",
+                  details: deals.filter(d => differenceInDays(new Date(), parseISO(d.lastActivityDate)) > 7)
+                })}
+              >
                 <Calendar className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-sm text-yellow-900">Low Freshness ({metrics.freshnessScore.toFixed(0)}%)</h4>
-                  <p className="text-xs text-yellow-700 mt-1">Target is 80%. Team needs to update next steps more frequently.</p>
+                  <p className="text-xs text-yellow-700 mt-1">Target is 80%. Team needs to update next steps more frequently. Click for details.</p>
                 </div>
               </div>
             )}
@@ -412,7 +420,7 @@ export default function Dashboard() {
               {selectedRisk?.desc}
             </DialogDescription>
           </DialogHeader>
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-3 max-h-[400px] overflow-y-auto pr-2">
             <h4 className="text-sm font-semibold uppercase text-muted-foreground">Contributing Deals</h4>
             {selectedRisk?.details.map((deal, idx) => (
               <div key={idx} className="flex justify-between items-center p-3 bg-muted/30 rounded border">
