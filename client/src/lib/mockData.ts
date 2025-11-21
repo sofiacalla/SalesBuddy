@@ -110,16 +110,16 @@ const generateAnnualDeals = (): Deal[] => {
     const months = eachMonthOfInterval({ start, end });
     
     const dealTemplates = [
-        { title: "Enterprise Expansion", amount: 450000, stage: "NEGOTIATION", confidence: "HIGH" },
-        { title: "Maintenance Contract", amount: 120000, stage: "PROPOSAL", confidence: "MEDIUM" },
-        { title: "New Logistics Route", amount: 850000, stage: "DISCOVERY", confidence: "LOW" },
-        { title: "Software License", amount: 200000, stage: "CLOSED_WON", confidence: "HIGH" },
-        { title: "Training Module", amount: 25000, stage: "PROPOSAL", confidence: "MEDIUM" },
-        { title: "Tracking System", amount: 1200000, stage: "NEGOTIATION", confidence: "HIGH" },
-        { title: "Infrastructure Upgrade", amount: 600000, stage: "DISCOVERY", confidence: "LOW" },
-        { title: "Equipment Supply", amount: 350000, stage: "PROPOSAL", confidence: "MEDIUM" },
-        { title: "Support Renewal", amount: 50000, stage: "NEGOTIATION", confidence: "HIGH" },
-        { title: "Consulting Project", amount: 75000, stage: "CLOSED_WON", confidence: "HIGH" }
+        { title: "Global Fleet Expansion", amount: 450000, stage: "NEGOTIATION", confidence: "HIGH" },
+        { title: "Annual Maintenance Renewal", amount: 120000, stage: "PROPOSAL", confidence: "MEDIUM" },
+        { title: "New Logistics Hub Setup", amount: 850000, stage: "DISCOVERY", confidence: "LOW" },
+        { title: "Enterprise Software License", amount: 200000, stage: "CLOSED_WON", confidence: "HIGH" },
+        { title: "Staff Training Program", amount: 25000, stage: "PROPOSAL", confidence: "MEDIUM" },
+        { title: "Global Tracking System Implementation", amount: 1200000, stage: "NEGOTIATION", confidence: "HIGH" },
+        { title: "Cloud Infrastructure Upgrade", amount: 600000, stage: "DISCOVERY", confidence: "LOW" },
+        { title: "Q4 Equipment Supply", amount: 350000, stage: "PROPOSAL", confidence: "MEDIUM" },
+        { title: "Premium Support Renewal", amount: 50000, stage: "NEGOTIATION", confidence: "HIGH" },
+        { title: "Strategic Consulting Project", amount: 75000, stage: "CLOSED_WON", confidence: "HIGH" }
     ];
 
     let dealCounter = 1;
@@ -163,7 +163,7 @@ const generateAnnualDeals = (): Deal[] => {
                 accountId: account.id,
                 ownerId: owner.id,
                 ownerName: owner.name,
-                title: `${template.title} ${format(month, 'MMM')}`,
+                title: `${account.name} - ${template.title}`,
                 amount: template.amount + (Math.random() * 50000 - 25000),
                 currency: "USD",
                 stage: stage,
@@ -189,7 +189,7 @@ const generateAnnualDeals = (): Deal[] => {
                 accountId: account.id,
                 ownerId: owner.id,
                 ownerName: owner.name,
-                title: `Upside Opportunity ${format(month, 'MMM')}`,
+                title: `${account.name} - Upside Opportunity`,
                 amount: 150000 + Math.floor(Math.random() * 100000),
                 currency: "USD",
                 stage: "DISCOVERY",

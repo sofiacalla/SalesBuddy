@@ -78,7 +78,7 @@ export default function RepMyWeek() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Priority List */}
         <div className="lg:col-span-1 space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Deals Requiring Attention</h3>
+          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Action Items</h3>
           <div className="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
             {priorityDeals.map((deal, index) => {
               const isStale = differenceInDays(new Date(), parseISO(deal.lastActivityDate)) > 7;
