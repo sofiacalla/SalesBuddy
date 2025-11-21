@@ -179,30 +179,68 @@ const generateAnnualDeals = (): Deal[] => {
         }
         
         // FORCE add at least one LOW/MEDIUM confidence deal per month to ensure "Uncommitted" pipeline exists
-        if (Math.random() > 0) { // Always true, explicit block
-             const account = ACCOUNTS[Math.floor(Math.random() * ACCOUNTS.length)];
-             const owner = OWNERS[Math.floor(Math.random() * OWNERS.length)];
-             const closeDate = addDays(month, 15);
-             
-             deals.push({
-                id: `deal-forced-uncommitted-${dealCounter++}`,
-                accountId: account.id,
-                ownerId: owner.id,
-                ownerName: owner.name,
-                title: `${account.name} - Upside Opportunity`,
-                amount: 150000 + Math.floor(Math.random() * 100000),
-                currency: "USD",
-                stage: "DISCOVERY",
-                confidence: "LOW", // Uncommitted
-                closeDate: closeDate.toISOString(),
-                lastActivityDate: subDays(now, 5).toISOString(),
-                nextStep: "Initial review",
-                nextStepDate: addDays(now, 5).toISOString(),
-                createdAt: subDays(closeDate, 30).toISOString(),
-                updatedAt: subDays(now, 5).toISOString(),
-                probability: 25
-            });
-        }
+        const forceAccount = ACCOUNTS[Math.floor(Math.random() * ACCOUNTS.length)];
+        const forceOwner = OWNERS[Math.floor(Math.random() * OWNERS.length)];
+        
+        // 1. Force Uncommitted (Low Confidence)
+        deals.push({
+            id: `deal-forced-uncommitted-${dealCounter++}`,
+            accountId: forceAccount.id,
+            ownerId: forceOwner.id,
+            ownerName: forceOwner.name,
+            title: `${forceAccount.name} - Upside Opportunity`,
+            amount: 150000 + Math.floor(Math.random() * 100000),
+            currency: "USD",
+            stage: "DISCOVERY",
+            confidence: "LOW",
+            closeDate: addDays(month, 15).toISOString(),
+            lastActivityDate: subDays(now, 5).toISOString(),
+            nextStep: "Initial review",
+            nextStepDate: addDays(now, 5).toISOString(),
+            createdAt: subDays(month, 30).toISOString(),
+            updatedAt: subDays(now, 5).toISOString(),
+            probability: 25
+        });
+
+        // 2. Force Committed (High/Medium Confidence)
+        deals.push({
+            id: `deal-forced-committed-${dealCounter++}`,
+            accountId: forceAccount.id,
+            ownerId: forceOwner.id,
+            ownerName: forceOwner.name,
+            title: `${forceAccount.name} - Committed Renewal`,
+            amount: 200000 + Math.floor(Math.random() * 100000),
+            currency: "USD",
+            stage: "NEGOTIATION",
+            confidence: "HIGH",
+            closeDate: addDays(month, 20).toISOString(),
+            lastActivityDate: subDays(now, 2).toISOString(),
+            nextStep: "Final Sign-off",
+            nextStepDate: addDays(now, 2).toISOString(),
+            createdAt: subDays(month, 60).toISOString(),
+            updatedAt: subDays(now, 2).toISOString(),
+            probability: 90
+        });
+
+        // 3. Force Closed Won (Actuals)
+        deals.push({
+            id: `deal-forced-won-${dealCounter++}`,
+            accountId: forceAccount.id,
+            ownerId: forceOwner.id,
+            ownerName: forceOwner.name,
+            title: `${forceAccount.name} - Strategic Win`,
+            amount: 100000 + Math.floor(Math.random() * 50000),
+            currency: "USD",
+            stage: "CLOSED_WON",
+            confidence: "HIGH",
+            closeDate: addDays(month, 10).toISOString(),
+            lastActivityDate: subDays(now, 15).toISOString(),
+            nextStep: "Onboarding",
+            nextStepDate: addDays(now, 15).toISOString(),
+            createdAt: subDays(month, 90).toISOString(),
+            updatedAt: subDays(month, 5).toISOString(),
+            probability: 100
+        });
     });
     
     return deals;
