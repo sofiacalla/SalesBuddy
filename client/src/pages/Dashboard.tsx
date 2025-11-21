@@ -62,13 +62,13 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 bg-card p-1 rounded-lg border shadow-sm">
           <Calendar className="w-4 h-4 text-muted-foreground ml-2" />
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[180px] border-0 shadow-none focus:ring-0">
+            <SelectTrigger className="w-[200px] border-0 shadow-none focus:ring-0 font-medium">
               <SelectValue placeholder="Select Month" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={format(subMonths(new Date(), 1), 'yyyy-MM')}>Last Month</SelectItem>
-              <SelectItem value={format(new Date(), 'yyyy-MM')}>Current Month</SelectItem>
-              <SelectItem value={format(addMonths(new Date(), 1), 'yyyy-MM')}>Next Month</SelectItem>
+              <SelectItem value={format(subMonths(new Date(), 1), 'yyyy-MM')}>{format(subMonths(new Date(), 1), 'MMMM yyyy')}</SelectItem>
+              <SelectItem value={format(new Date(), 'yyyy-MM')}>{format(new Date(), 'MMMM yyyy')}</SelectItem>
+              <SelectItem value={format(addMonths(new Date(), 1), 'yyyy-MM')}>{format(addMonths(new Date(), 1), 'MMMM yyyy')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -177,7 +177,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="border-l-4 border-l-green-500 shadow-sm relative group">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Conservative</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Conservative Scenario</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">{formatCurrency(metrics.conservative)}</div>
@@ -196,7 +196,7 @@ export default function Dashboard() {
         </Card>
         <Card className="border-l-4 border-l-blue-500 shadow-sm bg-blue-50/50 relative group">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Base Forecast</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">Actual Forecast</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-700">{formatCurrency(metrics.base)}</div>
@@ -215,7 +215,7 @@ export default function Dashboard() {
         </Card>
         <Card className="border-l-4 border-l-orange-500 shadow-sm relative group">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Optimistic</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Optimistic Scenario</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-foreground">{formatCurrency(metrics.optimistic)}</div>
@@ -238,8 +238,8 @@ export default function Dashboard() {
         {/* Chart: Pipeline Composition */}
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Forecast Composition</CardTitle>
-            <CardDescription>Breakdown of Committed vs. Uncommitted revenue</CardDescription>
+            <CardTitle>Forecast Composition ({format(new Date(selectedMonth + "-01"), 'MMMM')})</CardTitle>
+            <CardDescription>Breakdown of Committed vs. Uncommitted revenue for {format(new Date(selectedMonth + "-01"), 'MMMM yyyy')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
