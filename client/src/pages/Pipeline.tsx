@@ -1,3 +1,14 @@
+/**
+ * Pipeline Management Page
+ * 
+ * Provides a tabular view of all opportunities in the system.
+ * Features:
+ * - Filtering by Stage
+ * - Global Search (Deals, Owners)
+ * - Edit functionality for existing deals
+ * - Creation of new opportunities with duplicate checking
+ */
+
 import { useState, useEffect } from "react";
 import { getDeals, Deal, updateDeal, addDeal, getAccounts } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

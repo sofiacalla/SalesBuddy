@@ -1,3 +1,14 @@
+/**
+ * Mock Data Module
+ * 
+ * This file serves as the "backend" for the client-side prototype.
+ * It defines the core data types (Deal, Account, etc.) and generates 
+ * a rich set of realistic sample data to populate the application.
+ * 
+ * It includes helper functions to simulate database operations like 
+ * fetching, adding, and updating records in memory.
+ */
+
 import { addDays, subDays, subMonths, addMonths, format, eachMonthOfInterval, startOfYear, endOfYear } from "date-fns";
 
 /**

@@ -15,9 +15,31 @@ import { useToast } from "@/hooks/use-toast";
 
 /**
  * Rep "My Week" Page
- * Focuses on high-priority actions for the sales representative.
- * Features a ranked list of deals needing attention and an inline update wizard.
+ * 
+ * Designed for individual sales representatives.
+ * Focuses on execution and prioritization rather than high-level analytics.
+ * 
+ * Key Features:
+ * 1. Prioritized Task List: Auto-sorted by urgency (Stale > Value > Date)
+ * 2. Inline Update Wizard: Step-by-step flow to update deal status
+ * 3. Focus Mode: Removes distractions to help reps clear their queue
  */
+
+import { useState, useEffect } from "react";
+import { getDeals, updateDeal, Deal } from "@/lib/mockData";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CheckCircle2, Calendar as CalendarIcon, AlertCircle, ArrowRight, Save } from "lucide-react";
+import { format, differenceInDays, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+
 export default function RepMyWeek() {
   const [deals, setDeals] = useState(getDeals());
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
@@ -26,6 +48,7 @@ export default function RepMyWeek() {
   // Local state for form fields to allow editing before saving
   const [formData, setFormData] = useState<Partial<Deal>>({});
 
+  // Sync form data when selection changes
   useEffect(() => {
     if (selectedDealId) {
       const deal = deals.find(d => d.id === selectedDealId);

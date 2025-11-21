@@ -1,3 +1,15 @@
+/**
+ * Accounts Page
+ * 
+ * Manages the directory of client accounts and their related opportunities.
+ * 
+ * Features:
+ * - Grid view of all accounts with quick contact info
+ * - Detailed Account View via Dialog
+ * - Activity Logging (Calls, Emails, Notes) linked to specific deals
+ * - Ability to add new Opportunities directly from the Account view
+ */
+
 import { useState } from "react";
 import { getAccounts, getAccountDeals, addActivityToDeal, addDeal, getDeals, Account, Deal } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -41,6 +53,7 @@ export default function Accounts() {
     setDeals(getAccountDeals(account.id));
   };
 
+  // Initialize form with defaults when opening the Add Deal modal
   const handleAddDealClick = () => {
       setNewDealForm({
           stage: "DISCOVERY",
@@ -65,7 +78,7 @@ export default function Accounts() {
           errors.title = "Deal title is required";
           hasError = true;
       } else {
-          // Check for global duplicates
+          // Check for global duplicates to maintain data integrity
           const allDeals = getDeals();
           const duplicate = allDeals.find(d => d.title.toLowerCase() === newDealForm.title?.trim().toLowerCase());
           if (duplicate) {
@@ -137,7 +150,7 @@ export default function Accounts() {
       return;
     }
 
-    // Save Activity
+    // Save Activity to the mock backend
     const updatedDeal = addActivityToDeal(activityForm.dealId, {
       type: activityForm.type as any,
       notes: activityForm.notes

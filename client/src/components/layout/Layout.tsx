@@ -1,3 +1,13 @@
+/**
+ * Main Application Layout
+ * 
+ * Wraps all pages with:
+ * 1. Sidebar Navigation: persistent navigation links
+ * 2. Top Header: Global search and user profile
+ * 3. Global Search: Instant search for Deals and Accounts
+ * 4. Responsive Container: Handles scrolling and layout structure
+ */
+
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { LayoutDashboard, Users, BarChart3, Settings, Bell, Search, CheckCircle2, Building2, FileText } from "lucide-react";
@@ -12,6 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
+  // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -25,15 +36,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Live Search Implementation
   useEffect(() => {
     if (searchQuery.length < 2) {
       setSearchResults([]);
       return;
     }
     
+    // Search in both Deals and Accounts
     const deals = getDeals().filter(d => d.title.toLowerCase().includes(searchQuery.toLowerCase()));
     const accounts = getAccounts().filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()));
     
+    // Combine and limit results
     setSearchResults([
       ...accounts.map(a => ({ type: 'account', data: a })),
       ...deals.map(d => ({ type: 'deal', data: d }))

@@ -1,3 +1,13 @@
+/**
+ * Forecast Utilities
+ * 
+ * This module contains the core business logic for calculating forecast metrics,
+ * risk analysis, and pipeline health scores.
+ * 
+ * It is a pure utility file that transforms raw Deal data into 
+ * actionable insights for the Dashboard.
+ */
+
 import { Deal, Confidence, HistoricalRevenue } from "./mockData";
 import { differenceInDays, isAfter, parseISO, isSameMonth, subMonths, format } from "date-fns";
 

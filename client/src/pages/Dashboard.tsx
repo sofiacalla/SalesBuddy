@@ -26,15 +26,49 @@ import { Badge } from "@/components/ui/badge";
 
 /**
  * Manager Dashboard Page
- * Provides high-level visibility into forecast accuracy, pipeline health, and team performance.
- * Includes month filtering and specific coaching opportunities.
+ * 
+ * This is the landing page for sales managers.
+ * It aggregates data from all deals to provide high-level insights into:
+ * - Forecast Reliability (MAPE)
+ * - Pipeline Hygiene
+ * - Win Rates
+ * - Month-over-Month Growth
+ * 
+ * It uses the 'recharts' library for visualization and 'date-fns' for time-based filtering.
  */
+
+import { useMemo, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { getDeals, getHistoricalRevenue } from "@/lib/mockData";
+import { calculateForecast, isDealStale, getConcentrationRisk } from "@/lib/forecastUtils";
+import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from "recharts";
+import { ArrowUpRight, AlertTriangle, CheckCircle2, TrendingUp, Calendar, Target, Activity, Percent, Users, Info, Sparkles, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format, addMonths, subMonths, eachMonthOfInterval, startOfYear, endOfYear, differenceInDays, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
 export default function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const deals = getDeals();
   const history = getHistoricalRevenue();
   
-  // Dialog States
+  // Dialog States for interactive drill-downs
   const [selectedRisk, setSelectedRisk] = useState<{type: string, title: string, desc: string, details: any[]} | null>(null);
   const [selectedCoaching, setSelectedCoaching] = useState<{title: string, desc: string, details: string} | null>(null);
 
@@ -44,7 +78,7 @@ export default function Dashboard() {
     end: endOfYear(new Date())
   });
 
-  // Calculate metrics based on selected month
+  // Calculate metrics based on selected month using memoization for performance
   const metrics = useMemo(() => {
     const targetDate = new Date(selectedMonth + "-01"); // Append day to make it parseable
     return calculateForecast(deals, targetDate, history);
