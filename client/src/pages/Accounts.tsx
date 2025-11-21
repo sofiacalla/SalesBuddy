@@ -1,20 +1,62 @@
 import { useState } from "react";
 import { getAccounts, getAccountDeals, Account, Deal } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Phone, Mail, Building2, Plus, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Phone, Mail, Building2, Plus, ExternalLink, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Accounts() {
   const accounts = getAccounts();
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [deals, setDeals] = useState<Deal[]>([]);
+  const { toast } = useToast();
+
+  // Activity Log State
+  const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [activityForm, setActivityForm] = useState({
+    type: "",
+    notes: ""
+  });
 
   const handleAccountClick = (account: Account) => {
     setSelectedAccount(account);
     setDeals(getAccountDeals(account.id));
+  };
+
+  const handleLogActivity = () => {
+    // Basic Validation
+    if (!activityForm.type) {
+      toast({
+        title: "Validation Error",
+        description: "Please select an activity type.",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (!activityForm.notes.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter activity notes.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Simulate API call
+    toast({
+      title: "Activity Logged",
+      description: "The activity has been recorded successfully.",
+    });
+    
+    setIsActivityOpen(false);
+    setActivityForm({ type: "", notes: "" });
   };
 
   const formatCurrency = (val: number) => 
@@ -101,7 +143,12 @@ export default function Accounts() {
                 <p>High engagement detected. Consider proposing a multi-year contract extension during the next QBR.</p>
               </div>
 
-              <Button className="w-full" variant="outline" size="sm">
+              <Button 
+                className="w-full" 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsActivityOpen(true)}
+              >
                 <Plus className="w-3 h-3 mr-2" /> Log Activity
               </Button>
             </div>
@@ -151,6 +198,50 @@ export default function Accounts() {
               )}
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Log Activity Dialog */}
+      <Dialog open={isActivityOpen} onOpenChange={setIsActivityOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Log Activity</DialogTitle>
+            <DialogDescription>
+              Record a recent interaction with {selectedAccount?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="type">Activity Type</Label>
+              <Select 
+                value={activityForm.type} 
+                onValueChange={(val) => setActivityForm({...activityForm, type: val})}
+              >
+                <SelectTrigger id="type">
+                  <SelectValue placeholder="Select type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="call">Phone Call</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="meeting">Meeting</SelectItem>
+                  <SelectItem value="linkedin">LinkedIn Message</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea 
+                id="notes" 
+                placeholder="What was discussed?" 
+                value={activityForm.notes}
+                onChange={(e) => setActivityForm({...activityForm, notes: e.target.value})}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsActivityOpen(false)}>Cancel</Button>
+            <Button onClick={handleLogActivity}>Save Activity</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

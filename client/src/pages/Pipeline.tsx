@@ -1,18 +1,63 @@
-import { useState } from "react";
-import { getDeals, Deal } from "@/lib/mockData";
+import { useState, useEffect } from "react";
+import { getDeals, Deal, updateDeal } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Filter, Plus, Download, Search } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Filter, Plus, Download, Search, Save } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Pipeline() {
   const [deals, setDeals] = useState(getDeals());
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("ALL");
+  const { toast } = useToast();
+
+  // Edit Dialog State
+  const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Deal>>({});
+
+  const handleEditClick = (deal: Deal) => {
+    setEditingDeal(deal);
+    setEditForm({
+      title: deal.title,
+      amount: deal.amount,
+      stage: deal.stage,
+      probability: deal.probability,
+      nextStep: deal.nextStep,
+      confidence: deal.confidence
+    });
+  };
+
+  const handleSaveDeal = () => {
+    if (!editingDeal) return;
+
+    // Validation
+    if (!editForm.title?.trim()) {
+      toast({ title: "Validation Error", description: "Deal title is required", variant: "destructive" });
+      return;
+    }
+    if ((editForm.amount || 0) < 0) {
+      toast({ title: "Validation Error", description: "Amount cannot be negative", variant: "destructive" });
+      return;
+    }
+    if ((editForm.probability || 0) < 0 || (editForm.probability || 0) > 100) {
+      toast({ title: "Validation Error", description: "Probability must be between 0 and 100", variant: "destructive" });
+      return;
+    }
+
+    const updated = updateDeal(editingDeal.id, editForm);
+    if (updated) {
+      setDeals(prev => prev.map(d => d.id === editingDeal.id ? updated : d));
+      toast({ title: "Success", description: "Opportunity updated successfully." });
+      setEditingDeal(null);
+    }
+  };
 
   const filteredDeals = deals.filter(deal => {
     const matchesSearch = deal.title.toLowerCase().includes(search.toLowerCase()) || 
@@ -96,7 +141,11 @@ export default function Pipeline() {
             </TableHeader>
             <TableBody>
               {filteredDeals.map((deal) => (
-                <TableRow key={deal.id} className="group cursor-pointer hover:bg-muted/20">
+                <TableRow 
+                  key={deal.id} 
+                  className="group cursor-pointer hover:bg-muted/20"
+                  onClick={() => handleEditClick(deal)}
+                >
                   <TableCell className="font-medium">
                     {deal.title}
                     <div className="text-xs text-muted-foreground font-normal mt-0.5">
@@ -140,6 +189,106 @@ export default function Pipeline() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Opportunity Dialog */}
+      <Dialog open={!!editingDeal} onOpenChange={(open) => !open && setEditingDeal(null)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Opportunity</DialogTitle>
+            <DialogDescription>Update details for {editingDeal?.title}</DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="title">Deal Title</Label>
+                <Input 
+                  id="title" 
+                  value={editForm.title || ""} 
+                  onChange={(e) => setEditForm({...editForm, title: e.target.value})} 
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="amount">Amount ($)</Label>
+                <Input 
+                  id="amount" 
+                  type="number" 
+                  value={editForm.amount || 0} 
+                  onChange={(e) => setEditForm({...editForm, amount: Number(e.target.value)})} 
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="stage">Stage</Label>
+                <Select 
+                  value={editForm.stage} 
+                  onValueChange={(val: any) => setEditForm({...editForm, stage: val})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DISCOVERY">Discovery</SelectItem>
+                    <SelectItem value="PROPOSAL">Proposal</SelectItem>
+                    <SelectItem value="NEGOTIATION">Negotiation</SelectItem>
+                    <SelectItem value="CLOSED_WON">Closed Won</SelectItem>
+                    <SelectItem value="CLOSED_LOST">Closed Lost</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                 <Label htmlFor="confidence">Confidence</Label>
+                <Select 
+                  value={editForm.confidence} 
+                  onValueChange={(val: any) => setEditForm({...editForm, confidence: val})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="HIGH">High</SelectItem>
+                    <SelectItem value="MEDIUM">Medium</SelectItem>
+                    <SelectItem value="LOW">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="nextStep">Next Step</Label>
+              <Input 
+                id="nextStep" 
+                value={editForm.nextStep || ""} 
+                onChange={(e) => setEditForm({...editForm, nextStep: e.target.value})} 
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <div className="flex justify-between">
+                <Label htmlFor="probability">Probability (%)</Label>
+                <span className="text-xs text-muted-foreground">{editForm.probability}%</span>
+              </div>
+              <Input 
+                id="probability" 
+                type="number" 
+                min="0" 
+                max="100" 
+                value={editForm.probability || 0} 
+                onChange={(e) => setEditForm({...editForm, probability: Number(e.target.value)})} 
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingDeal(null)}>Cancel</Button>
+            <Button onClick={handleSaveDeal} className="gap-2">
+              <Save className="w-4 h-4" /> Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
