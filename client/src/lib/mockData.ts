@@ -177,6 +177,32 @@ const generateAnnualDeals = (): Deal[] => {
                 probability: probability
             });
         }
+        
+        // FORCE add at least one LOW/MEDIUM confidence deal per month to ensure "Uncommitted" pipeline exists
+        if (Math.random() > 0) { // Always true, explicit block
+             const account = ACCOUNTS[Math.floor(Math.random() * ACCOUNTS.length)];
+             const owner = OWNERS[Math.floor(Math.random() * OWNERS.length)];
+             const closeDate = addDays(month, 15);
+             
+             deals.push({
+                id: `deal-forced-uncommitted-${dealCounter++}`,
+                accountId: account.id,
+                ownerId: owner.id,
+                ownerName: owner.name,
+                title: `Upside Opportunity ${format(month, 'MMM')}`,
+                amount: 150000 + Math.floor(Math.random() * 100000),
+                currency: "USD",
+                stage: "DISCOVERY",
+                confidence: "LOW", // Uncommitted
+                closeDate: closeDate.toISOString(),
+                lastActivityDate: subDays(now, 5).toISOString(),
+                nextStep: "Initial review",
+                nextStepDate: addDays(now, 5).toISOString(),
+                createdAt: subDays(closeDate, 30).toISOString(),
+                updatedAt: subDays(now, 5).toISOString(),
+                probability: 25
+            });
+        }
     });
     
     return deals;

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { getDeals, getHistoricalRevenue } from "@/lib/mockData";
 import { calculateForecast, isDealStale, getConcentrationRisk } from "@/lib/forecastUtils";
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, LineChart, Line, Legend } from "recharts";
-import { ArrowUpRight, AlertTriangle, CheckCircle2, TrendingUp, Calendar, Target, Activity, Percent, Users, Info } from "lucide-react";
+import { ArrowUpRight, AlertTriangle, CheckCircle2, TrendingUp, Calendar, Target, Activity, Percent, Users, Info, Sparkles, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, addMonths, subMonths, eachMonthOfInterval, startOfYear, endOfYear } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * Manager Dashboard Page
@@ -23,6 +33,10 @@ export default function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   const deals = getDeals();
   const history = getHistoricalRevenue();
+  
+  // Dialog States
+  const [selectedRisk, setSelectedRisk] = useState<{type: string, title: string, desc: string, details: any[]} | null>(null);
+  const [selectedCoaching, setSelectedCoaching] = useState<{title: string, desc: string, details: string} | null>(null);
 
   // Generate months for the dropdown (Current Year)
   const months = eachMonthOfInterval({
@@ -181,60 +195,42 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* 3-Line Forecast Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-l-4 border-l-green-500 shadow-sm relative group">
+      {/* 2-Tile Forecast Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-l-4 border-l-green-500 shadow-sm bg-green-50/20 relative group">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Conservative Scenario</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-700">Actuals (Closed Won)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-foreground">{formatCurrency(metrics.conservative)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Locked-in revenue</p>
+            <div className="text-4xl font-bold text-green-700">{formatCurrency(metrics.closedWon)}</div>
+            <p className="text-sm text-green-600/80 mt-1">Realized revenue for {format(new Date(selectedMonth + "-01"), 'MMMM')}</p>
              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <Tooltip>
                 <TooltipTrigger>
-                  <Info className="w-4 h-4 text-muted-foreground/50 hover:text-primary" />
+                  <Info className="w-4 h-4 text-green-700/50 hover:text-green-900" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="max-w-xs">High Confidence deals closing within 14 days + already Closed Won.</p>
+                  <p className="max-w-xs">Revenue from deals already marked as 'Closed Won' this month.</p>
                 </TooltipContent>
               </Tooltip>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-blue-500 shadow-sm bg-blue-50/50 relative group">
+
+        <Card className="border-l-4 border-l-blue-500 shadow-sm bg-blue-50/20 relative group">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Actual Forecast</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">Monthly Forecast</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-700">{formatCurrency(metrics.base)}</div>
-            <p className="text-xs text-blue-600/80 mt-1">Most likely outcome</p>
+            <div className="text-4xl font-bold text-blue-700">{formatCurrency(metrics.base)}</div>
+            <p className="text-sm text-blue-600/80 mt-1">Projected landing (Closed + Committed)</p>
              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <Tooltip>
                 <TooltipTrigger>
                   <Info className="w-4 h-4 text-blue-700/50 hover:text-blue-900" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="max-w-xs">High & Medium Confidence deals closing within 30 days.</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-orange-500 shadow-sm relative group">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Optimistic Scenario</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-foreground">{formatCurrency(metrics.optimistic)}</div>
-            <p className="text-xs text-muted-foreground mt-1">Upside potential</p>
-             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="w-4 h-4 text-muted-foreground/50 hover:text-primary" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs">Base + Low Confidence deals + Early stage high value deals.</p>
+                  <p className="max-w-xs">Weighted forecast based on High & Medium confidence active deals + Closed Won.</p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -294,31 +290,47 @@ export default function Dashboard() {
         <Card className="border-red-100 bg-red-50/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-red-900">
-              <AlertTriangle className="w-5 h-5" />
-              Top Risks
+              <Sparkles className="w-5 h-5 text-red-500" />
+              Top Risks (AI Generated)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {concentrationRisk && (
-              <div className="flex items-start gap-3 p-3 bg-white rounded-md border border-red-100 shadow-sm">
+              <div 
+                className="flex items-start gap-3 p-3 bg-white rounded-md border border-red-100 shadow-sm cursor-pointer hover:shadow-md transition-all"
+                onClick={() => setSelectedRisk({
+                  type: "Concentration",
+                  title: "Concentration Risk Detected",
+                  desc: "Top 2 deals contribute >30% of your forecast.",
+                  details: deals.sort((a, b) => b.amount - a.amount).slice(0, 2)
+                })}
+              >
                 <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-sm text-red-900">Concentration Risk Detected</h4>
-                  <p className="text-xs text-red-700 mt-1">Top 2 deals contribute &gt;30% of your forecast. Diversify pipeline immediately.</p>
+                  <p className="text-xs text-red-700 mt-1">Top 2 deals contribute &gt;30% of your forecast. Click for details.</p>
                 </div>
               </div>
             )}
             {staleDeals.length > 0 && (
-              <div className="flex items-start gap-3 p-3 bg-white rounded-md border border-orange-100 shadow-sm">
+              <div 
+                className="flex items-start gap-3 p-3 bg-white rounded-md border border-orange-100 shadow-sm cursor-pointer hover:shadow-md transition-all"
+                onClick={() => setSelectedRisk({
+                  type: "Stale",
+                  title: `${staleDeals.length} Stale Deals`,
+                  desc: "Deals with no activity in 7+ days.",
+                  details: staleDeals
+                })}
+              >
                 <Activity className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-sm text-orange-900">{staleDeals.length} Stale Deals</h4>
-                  <p className="text-xs text-orange-700 mt-1">Deals with no activity in 7+ days. Review immediately.</p>
+                  <p className="text-xs text-orange-700 mt-1">Deals with no activity in 7+ days. Click to review.</p>
                 </div>
               </div>
             )}
             {metrics.freshnessScore < 80 && (
-              <div className="flex items-start gap-3 p-3 bg-white rounded-md border border-yellow-100 shadow-sm">
+              <div className="flex items-start gap-3 p-3 bg-white rounded-md border border-yellow-100 shadow-sm cursor-default">
                 <Calendar className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-sm text-yellow-900">Low Freshness ({metrics.freshnessScore.toFixed(0)}%)</h4>
@@ -340,7 +352,14 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               {metrics.winRate < 40 && (
-                 <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
+                 <div 
+                   className="p-3 border rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                   onClick={() => setSelectedCoaching({
+                     title: "Win Rate Optimization",
+                     desc: "Win rate is currently below 40%.",
+                     details: "Focus on better qualification in the Discovery stage. Review 'Closed Lost' reasons from the last quarter to identify patterns. Suggest role-playing objection handling for pricing discussions."
+                   })}
+                 >
                   <div className="flex justify-between">
                     <h4 className="font-bold text-sm">Win Rate Optimization</h4>
                     <span className="text-xs font-bold text-red-600">High Impact</span>
@@ -348,14 +367,28 @@ export default function Dashboard() {
                   <p className="text-xs text-muted-foreground mt-1">Win rate is below 40%. Review qualification criteria in Discovery stage with team.</p>
                 </div>
               )}
-              <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
+              <div 
+                className="p-3 border rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                onClick={() => setSelectedCoaching({
+                  title: "Alex Sales - Negotiation Stagnation",
+                  desc: "Has 3 deals in Negotiation for > 14 days.",
+                  details: "Alex tends to get stuck in legal review. Suggest he proactively schedule a joint call with legal and the champion to unblock these deals. Review the 'Global Tracking System' deal specifically."
+                })}
+              >
                 <div className="flex justify-between">
                   <h4 className="font-bold text-sm">Alex Sales</h4>
                   <span className="text-xs font-bold text-orange-600">Medium Impact</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Has 3 deals in Negotiation for &gt; 14 days. Strategy session needed.</p>
               </div>
-               <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors">
+               <div 
+                 className="p-3 border rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                 onClick={() => setSelectedCoaching({
+                   title: "Jordan Closer - Hygiene Excellence",
+                   desc: "100% Pipeline Hygiene this week.",
+                   details: "Jordan has maintained perfect records. Ask him to share his 'end of day' routine with the rest of the team during the Monday standup to encourage peer learning."
+                 })}
+               >
                 <div className="flex justify-between">
                   <h4 className="font-bold text-sm">Jordan Closer</h4>
                   <span className="text-xs font-bold text-green-600">Positive Reinforcement</span>
@@ -366,9 +399,66 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Details Dialog for Risks */}
+      <Dialog open={!!selectedRisk} onOpenChange={(open) => !open && setSelectedRisk(null)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-900">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              {selectedRisk?.title}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedRisk?.desc}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-3">
+            <h4 className="text-sm font-semibold uppercase text-muted-foreground">Contributing Deals</h4>
+            {selectedRisk?.details.map((deal, idx) => (
+              <div key={idx} className="flex justify-between items-center p-3 bg-muted/30 rounded border">
+                <div>
+                  <p className="font-bold text-sm">{deal.title}</p>
+                  <p className="text-xs text-muted-foreground">{deal.ownerName} • {deal.stage}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-mono font-medium">{formatCurrency(deal.amount)}</p>
+                  <Badge variant="outline" className="text-[10px] h-5">{deal.confidence}</Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 p-4 bg-blue-50 text-blue-900 text-sm rounded-md">
+            <span className="font-bold">AI Recommendation:</span> {selectedRisk?.type === 'Concentration' ? 'Prioritize small-to-medium deals to diversify risk. Do not rely solely on these whales.' : 'Schedule a "Pipeline Flush" session to close or move these stale deals out.'}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Details Dialog for Coaching */}
+      <Dialog open={!!selectedCoaching} onOpenChange={(open) => !open && setSelectedCoaching(null)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-primary">
+              <Sparkles className="w-5 h-5 text-primary" />
+              Coaching Insight
+            </DialogTitle>
+            <DialogDescription className="font-medium text-foreground text-lg">
+              {selectedCoaching?.title}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 space-y-4">
+            <p className="text-muted-foreground italic">"{selectedCoaching?.desc}"</p>
+            <div className="p-4 bg-muted rounded-md border">
+              <h4 className="text-sm font-bold mb-2 uppercase tracking-wider text-primary">Action Plan</h4>
+              <p className="text-sm leading-relaxed">{selectedCoaching?.details}</p>
+            </div>
+          </div>
+           <div className="flex justify-end gap-2 mt-4">
+             <Button variant="outline" onClick={() => setSelectedCoaching(null)}>Close</Button>
+             <Button>Add to 1:1 Agenda</Button>
+           </div>
+        </DialogContent>
+      </Dialog>
     </div>
     </TooltipProvider>
   );
 }
-
-
