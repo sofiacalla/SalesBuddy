@@ -1,3 +1,10 @@
+/**
+ * Scroll Area Component
+ * 
+ * Augments native scroll functionality for custom, cross-browser styling.
+ * Built on top of Radix UI Scroll Area primitive.
+ */
+
 import * as React from "react"
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 

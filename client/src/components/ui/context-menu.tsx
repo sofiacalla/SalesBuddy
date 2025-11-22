@@ -1,3 +1,10 @@
+/**
+ * Context Menu Component
+ * 
+ * A menu that appears on right-click or long-press.
+ * Built on top of Radix UI Context Menu primitive.
+ */
+
 import * as React from "react"
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
 import { Check, ChevronRight, Circle } from "lucide-react"

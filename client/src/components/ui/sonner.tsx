@@ -1,3 +1,10 @@
+/**
+ * Sonner Toast Component
+ * 
+ * An opinionated toast component for React.
+ * Built on top of sonner library.
+ */
+
 "use client"
 
 import { useTheme } from "next-themes"

@@ -1,3 +1,10 @@
+/**
+ * Label Component
+ * 
+ * Renders an accessible label associated with controls.
+ * Built on top of Radix UI Label primitive.
+ */
+
 "use client"
 
 import * as React from "react"

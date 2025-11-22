@@ -1,3 +1,10 @@
+/**
+ * Progress Component
+ * 
+ * Displays an indicator showing the completion progress of a task.
+ * Built on top of Radix UI Progress primitive.
+ */
+
 "use client"
 
 import * as React from "react"

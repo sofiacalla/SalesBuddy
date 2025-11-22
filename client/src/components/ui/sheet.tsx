@@ -1,3 +1,10 @@
+/**
+ * Sheet Component
+ * 
+ * Extends the Dialog component to display content that complements the main screen.
+ * Often used for sidebars or mobile navigation.
+ */
+
 "use client"
 
 import * as React from "react"

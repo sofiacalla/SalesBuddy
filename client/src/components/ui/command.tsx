@@ -1,3 +1,10 @@
+/**
+ * Command Component
+ * 
+ * Fast, composable, unstyled command menu for React.
+ * Built on top of cmdk.
+ */
+
 "use client"
 
 import * as React from "react"

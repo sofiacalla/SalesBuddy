@@ -1,3 +1,10 @@
+/**
+ * Dropdown Menu Component
+ * 
+ * Displays a menu to the user — such as a set of actions or functions — triggered by a button.
+ * Built on top of Radix UI Dropdown Menu primitive.
+ */
+
 "use client"
 
 import * as React from "react"

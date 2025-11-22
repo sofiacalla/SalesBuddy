@@ -1,3 +1,10 @@
+/**
+ * Drawer Component
+ * 
+ * A panel that slides out from the edge of the screen.
+ * Built on top of Vaul.
+ */
+
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 

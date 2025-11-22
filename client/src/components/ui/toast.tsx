@@ -1,3 +1,10 @@
+/**
+ * Toast Component
+ * 
+ * A succinct message that is displayed temporarily.
+ * Built on top of Radix UI Toast primitive.
+ */
+
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"

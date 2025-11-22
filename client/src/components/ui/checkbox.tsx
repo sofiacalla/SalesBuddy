@@ -1,3 +1,10 @@
+/**
+ * Checkbox Component
+ * 
+ * A control that allows the user to toggle between checked and not checked.
+ * Built on top of Radix UI Checkbox primitive.
+ */
+
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { Check } from "lucide-react"

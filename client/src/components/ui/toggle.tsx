@@ -1,3 +1,10 @@
+/**
+ * Toggle Component
+ * 
+ * A two-state button that can be either on or off.
+ * Built on top of Radix UI Toggle primitive.
+ */
+
 import * as React from "react"
 import * as TogglePrimitive from "@radix-ui/react-toggle"
 import { cva, type VariantProps } from "class-variance-authority"

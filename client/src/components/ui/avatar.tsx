@@ -1,3 +1,10 @@
+/**
+ * Avatar Component
+ * 
+ * An image element with a fallback for representing the user.
+ * Built on top of Radix UI Avatar primitive.
+ */
+
 "use client"
 
 import * as React from "react"

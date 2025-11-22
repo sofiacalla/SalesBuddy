@@ -1,3 +1,10 @@
+/**
+ * Menubar Component
+ * 
+ * A visually persistent menu common in desktop applications.
+ * Built on top of Radix UI Menubar primitive.
+ */
+
 import * as React from "react"
 import * as MenubarPrimitive from "@radix-ui/react-menubar"
 import { Check, ChevronRight, Circle } from "lucide-react"

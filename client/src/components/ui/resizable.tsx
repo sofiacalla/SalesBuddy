@@ -1,3 +1,10 @@
+/**
+ * Resizable Component
+ * 
+ * Accessible resizable panel groups and layouts.
+ * Built on top of react-resizable-panels.
+ */
+
 "use client"
 
 import { GripVertical } from "lucide-react"

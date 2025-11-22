@@ -1,3 +1,9 @@
+/**
+ * Toaster Component
+ * 
+ * The container that renders all active toast notifications.
+ */
+
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,

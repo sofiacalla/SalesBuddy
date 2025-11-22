@@ -1,3 +1,9 @@
+/**
+ * Alert Component
+ * 
+ * Displays a callout for user attention, typically for error, warning, or success messages.
+ */
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 

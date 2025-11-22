@@ -1,3 +1,10 @@
+/**
+ * Radio Group Component
+ * 
+ * A set of checkable buttons—known as radio buttons—where no more than one of the buttons can be checked at a time.
+ * Built on top of Radix UI Radio Group primitive.
+ */
+
 import * as React from "react"
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
 import { Circle } from "lucide-react"

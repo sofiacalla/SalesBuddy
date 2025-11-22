@@ -1,3 +1,10 @@
+/**
+ * Sidebar Component
+ * 
+ * A composable sidebar component system for application layouts.
+ * Handles collapsible state, mobile responsiveness, and layout structure.
+ */
+
 "use client"
 
 import * as React from "react"

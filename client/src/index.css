@@ -1,3 +1,11 @@
+/**
+ * Global Styles
+ * 
+ * Main CSS file using Tailwind CSS directives.
+ * Defines global theme variables (colors, fonts, radius) for both light and dark modes.
+ * Includes custom utility classes and animations.
+ */
+
 @import "tailwindcss";
 @import "tw-animate-css";
 

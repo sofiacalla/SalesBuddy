@@ -1,3 +1,9 @@
+/**
+ * Calendar Component
+ * 
+ * A date picker calendar component built on top of react-day-picker.
+ */
+
 "use client"
 
 import * as React from "react"

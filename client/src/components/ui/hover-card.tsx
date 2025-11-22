@@ -1,3 +1,10 @@
+/**
+ * Hover Card Component
+ * 
+ * A card that appears when a user hovers over an element.
+ * Built on top of Radix UI Hover Card primitive.
+ */
+
 import * as React from "react"
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card"
 

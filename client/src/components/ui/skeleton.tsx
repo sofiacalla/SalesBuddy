@@ -1,3 +1,10 @@
+/**
+ * Skeleton Component
+ * 
+ * Used to show a placeholder while content is loading.
+ * Animated pulse effect to indicate loading state.
+ */
+
 import { cn } from "@/lib/utils"
 
 function Skeleton({

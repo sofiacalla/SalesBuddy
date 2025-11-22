@@ -1,3 +1,10 @@
+/**
+ * Popover Component
+ * 
+ * Displays rich content in a portal, triggered by a button.
+ * Built on top of Radix UI Popover primitive.
+ */
+
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 

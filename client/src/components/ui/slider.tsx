@@ -1,3 +1,10 @@
+/**
+ * Slider Component
+ * 
+ * An input where the user selects a value from within a given range.
+ * Built on top of Radix UI Slider primitive.
+ */
+
 import * as React from "react"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 

@@ -1,3 +1,10 @@
+/**
+ * Input OTP Component
+ * 
+ * A set of input fields for entering One-Time Passwords (OTP).
+ * Built on top of input-otp.
+ */
+
 import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 import { Minus } from "lucide-react"

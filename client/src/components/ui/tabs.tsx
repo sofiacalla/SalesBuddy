@@ -1,3 +1,10 @@
+/**
+ * Tabs Component
+ * 
+ * A set of layered sections of content—known as tab panels—that are displayed one at a time.
+ * Built on top of Radix UI Tabs primitive.
+ */
+
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 

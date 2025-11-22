@@ -1,3 +1,10 @@
+/**
+ * Accordion Component
+ * 
+ * A vertically stacked set of interactive headings that each reveal a section of content.
+ * Built on top of Radix UI Accordion primitive.
+ */
+
 import * as React from "react"
 import * as AccordionPrimitive from "@radix-ui/react-accordion"
 import { ChevronDown } from "lucide-react"

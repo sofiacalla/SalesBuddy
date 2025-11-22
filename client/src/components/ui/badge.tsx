@@ -1,3 +1,9 @@
+/**
+ * Badge Component
+ * 
+ * Displays a status or category label, often used for tagging items.
+ */
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 

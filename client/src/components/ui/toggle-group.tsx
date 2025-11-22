@@ -1,3 +1,10 @@
+/**
+ * Toggle Group Component
+ * 
+ * A set of two-state buttons that can be toggled on or off.
+ * Built on top of Radix UI Toggle Group primitive.
+ */
+
 "use client"
 
 import * as React from "react"

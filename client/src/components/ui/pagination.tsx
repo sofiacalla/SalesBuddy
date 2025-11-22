@@ -1,3 +1,10 @@
+/**
+ * Pagination Component
+ * 
+ * A component for navigating through pages of data.
+ * Includes Previous/Next buttons and page number links.
+ */
+
 import * as React from "react"
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
 
