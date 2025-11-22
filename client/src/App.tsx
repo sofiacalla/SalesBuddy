@@ -14,12 +14,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
-import Accounts from "@/pages/Accounts";
-import Pipeline from "@/pages/Pipeline";
+import Transactions from "@/pages/Transactions";
+import Budget from "@/pages/Budget";
 import Settings from "@/pages/Settings";
+import Accounts from "@/pages/Accounts"; // Keeping this but might need refactoring
 import NotFound from "@/pages/not-found";
-
-import RepMyWeek from "@/pages/RepMyWeek";
 
 /**
  * Router Component
@@ -31,10 +30,10 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Dashboard} />
-        <Route path="/my-week" component={RepMyWeek} />
-        <Route path="/accounts" component={Accounts} />
-        <Route path="/pipeline" component={Pipeline} />
+        <Route path="/transactions" component={Transactions} />
+        <Route path="/budget" component={Budget} />
         <Route path="/settings" component={Settings} />
+        <Route path="/accounts" component={Accounts} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
