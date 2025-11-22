@@ -73,7 +73,7 @@ export default function Pipeline() {
       // Check for duplicates
       const duplicate = deals.find(d => d.title.toLowerCase() === editForm.title?.trim().toLowerCase() && d.id !== editingDeal.id);
       if (duplicate) {
-        newErrors.title = "An opportunity with this name already exists";
+        newErrors.title = "no duplicate opportunities";
         hasError = true;
       }
     }
