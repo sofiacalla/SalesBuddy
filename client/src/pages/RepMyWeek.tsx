@@ -50,7 +50,9 @@ export default function RepMyWeek() {
   }, [selectedDealId, deals]);
 
   // Sort deals by priority: Stale > High Value > Closing Soon
-  const priorityDeals = [...deals].sort((a, b) => {
+  const priorityDeals = deals
+    .filter(d => d.stage !== "WON" && d.stage !== "LOST")
+    .sort((a, b) => {
     const now = new Date();
     const aStale = differenceInDays(now, parseISO(a.lastActivityDate)) > 7;
     const bStale = differenceInDays(now, parseISO(b.lastActivityDate)) > 7;
