@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getDeals, updateDeal, Deal } from "@/lib/mockData";
+import { getDeals, updateDeal, addActivityToDeal, Deal } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,14 +65,27 @@ export default function RepMyWeek() {
   const handleSaveUpdate = () => {
     if (!selectedDealId) return;
 
+    // 1. If there are notes, add them as a specific activity log
+    if (formData.notes && formData.notes.trim().length > 0) {
+      addActivityToDeal(selectedDealId, {
+        type: "note",
+        notes: formData.notes
+      });
+    }
+
+    // 2. Update the deal properties
     const updated = updateDeal(selectedDealId, formData);
+    
     if (updated) {
       setDeals(prev => prev.map(d => d.id === selectedDealId ? updated : d));
       toast({
         title: "Deal Updated",
-        description: "Your changes have been saved successfully.",
+        description: "Your changes have been saved and notes logged to the account.",
         duration: 3000,
       });
+      
+      // 3. Close the wizard
+      setSelectedDealId(null);
     }
   };
 
