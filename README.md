@@ -1,46 +1,76 @@
-# Sales Buddy - Sales CRM Prototype
+# Sales Buddy - The Sales CRM That Actually Helps You Sell
 
-## Welcome to Sales Buddy!
+## 🌟 Why We Created Sales Buddy
 
-**Sales Buddy** is a modern Customer Relationship Management (CRM) tool designed to help sales teams focus on what matters most: closing deals and forecasting accurately.
+We built Sales Buddy because we believe CRM software has become too complicated. Instead of helping salespeople close deals, most CRMs turn into administrative burdens—endless forms, confusing menus, and cluttered screens that distract from the actual job of selling.
 
-This application is built to give both Managers and Sales Representatives exactly the views they need to succeed.
-
----
-
-## 🎯 Key Features
-
-### 1. Executive Dashboard (For Managers)
-The landing page gives you a high-level view of your business health.
-- **Forecast Reliability:** See how accurate your predictions are (MAPE).
-- **Pipeline Hygiene:** Check if your team is keeping their deal data up to date.
-- **AI Risk Detection:** Automatically spots "Stale" deals (no activity for 7+ days) or "Concentration Risk" (relying too much on one big deal).
-- **Coaching Opportunities:** Highlights specific areas where reps might need help.
-
-### 2. My Week (For Sales Reps)
-A focused view designed to clear the clutter.
-- **Priority List:** Deals are automatically ranked by urgency. Stale deals and high-value opportunities appear at the top.
-- **Focus Mode:** A simple, step-by-step wizard to update deals quickly without getting lost in complex forms.
-
-### 3. Accounts & Pipeline
-- **Accounts:** Your directory of clients. You can log calls, emails, and notes directly here.
-- **Pipeline:** A full spreadsheet-style view of every active opportunity in the system. You can filter by stage and search for specific deals.
+**Our Mission:** To simplify the CRM process for all sellers. We strip away the noise and focus purely on:
+1.  **Health:** Is the pipeline real?
+2.  **Focus:** What do I need to do *today*?
+3.  **Truth:** Can we trust our forecast?
 
 ---
 
-## 🚀 How to Navigate
+## 🚀 Key Features & Functionality
 
-- **Dashboard:** Click the "Dashboard" icon in the left sidebar to return to the main metrics view.
-- **Search:** Use the search bar at the top of the screen to instantly find any Deal or Account.
-- **Quick Actions:**
-    - Go to **My Week** to update your deals.
-    - Go to **Accounts** to add a new client or log a call.
+### 1. Executive Dashboard (The "Truth" Center)
+*Designed for Sales Managers and Leaders.*
+
+Most dashboards are just pretty charts. Ours is a diagnostic tool for business health.
+*   **Forecast Reliability (MAPE):** We don't just show you the number; we tell you how accurate your team's predictions have been historically. This stops the "guessing game" at the end of the quarter.
+*   **Pipeline Health Score:** A single metric that tells you if your pipeline is clean or full of "zombie deals."
+*   **AI Risk Detection:**
+    *   **Stale Deals:** Automatically flags opportunities that haven't had activity in 7+ days.
+    *   **Concentration Risk:** Warns you if too much of your revenue depends on a single deal.
+    *   **Sandbagging:** Identifies deals that are likely to close but aren't committed yet.
+*   **Coaching Opportunities:** Instead of yelling at reps to "update Salesforce," managers can see exactly *who* needs help and *where*.
+
+### 2. My Week (The Rep's Copilot)
+*Designed for Account Executives and SDRs.*
+
+Sales reps shouldn't have to hunt for work. "My Week" tells them exactly what to do.
+*   **Smart Action Items:** The system automatically generates a to-do list based on deal activity.
+    *   "Update Next Steps for [Company X]"
+    *   "Log activity for [Company Y]"
+*   **Focus Mode:** A distraction-free interface that lets reps click through their updates one by one, like a playlist. No more opening 50 tabs.
+*   **Urgency Ranking:** Deals are sorted by priority—closing soon, high value, or neglected—so the most important calls happen first.
+
+### 3. Pipeline Management (Kanban & List)
+*The core workspace for managing opportunities.*
+
+*   **Visual Stages:** clearly defined stages (Lead -> Uncommitted -> Committed -> Won/Lost) make it obvious where every deal stands.
+*   **Duplicate Prevention:** The system actively checks for duplicate opportunities to keep data clean.
+*   **Quick Filters:** Instantly filter by stage, owner, or value to find the needle in the haystack.
+
+### 4. Account Management (360° Customer View)
+*Your digital rolodex.*
+
+*   **Activity Logging:** frictionless logging for Calls, Emails, and Meetings.
+*   **History Tracking:** See the entire story of a relationship in one scrolling timeline.
+*   **Contact Details:** Keep all key decision-makers and their contact info in one place.
+
+### 5. Built-in Enablement (Settings & Guide)
+*   **Interactive Guide:** We've built the manual directly into the app. The "Guide" tab explains our sales philosophy, stage definitions, and best practices, so new hires can onboard themselves.
 
 ---
 
-## 📝 Note
-This is a high-fidelity **prototype**. 
-- You can click around, add deals, and update information to test the workflow.
-- Data is stored temporarily in your browser for demonstration purposes.
+## 📖 A Day in the Life
 
-Enjoy using Sales Buddy!
+### For a Sales Rep:
+1.  **Morning:** Open "My Week." See 5 critical action items.
+2.  **Action:** Click "Start Focus Mode."
+3.  **Workflow:** Update the "Next Steps" for the big ACME Corp deal. Log a call for the Wayne Enterprises renewal.
+4.  **Done:** In 10 minutes, your CRM admin is done, and you're ready to start selling.
+
+### For a Sales Manager:
+1.  **Weekly Forecast Call:** Open the Dashboard.
+2.  **Review:** See that the "Forecast Reliability" is low (65%).
+3.  **Drill Down:** Notice that 3 large deals in "Committed" have had no activity for 2 weeks (Stale).
+4.  **Action:** Use the "Coaching Opportunities" widget to identify which reps own those deals and focus your 1:1s on unsticking them.
+
+---
+
+## 🛠 Technical Note
+This is a high-fidelity prototype running entirely in the browser. You can create deals, move them around, and explore the features freely. Data is stored locally in your session for demonstration purposes.
+
+**Sales Buddy: Stop Administering. Start Selling.**
