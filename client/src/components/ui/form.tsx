@@ -1,3 +1,10 @@
+/**
+ * Form Components
+ * 
+ * A set of wrapper components for React Hook Form integration.
+ * Handles form state, validation, error messaging, and accessibility automatically.
+ */
+
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 import { Slot } from "@radix-ui/react-slot"

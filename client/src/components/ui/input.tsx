@@ -1,3 +1,10 @@
+/**
+ * Input Component
+ * 
+ * Standard HTML input wrapper with custom styling and focus states.
+ * Supports all standard HTML input attributes.
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

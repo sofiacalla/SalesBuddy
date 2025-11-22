@@ -1,3 +1,10 @@
+/**
+ * 404 Not Found Page
+ * 
+ * Fallback route displayed when a user navigates to a non-existent URL.
+ * Provides a user-friendly error message.
+ */
+
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 

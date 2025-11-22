@@ -1,3 +1,10 @@
+/**
+ * Dialog Component
+ * 
+ * A modal dialog overlay built with Radix UI Dialog primitive.
+ * Used for critical interactions requiring user focus (alerts, forms).
+ */
+
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"

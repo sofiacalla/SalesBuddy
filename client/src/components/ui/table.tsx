@@ -1,3 +1,11 @@
+/**
+ * Table Component
+ * 
+ * A responsive data table component with sub-components for 
+ * Header, Body, Row, Cell, and Caption.
+ * Styled for readability and data density.
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

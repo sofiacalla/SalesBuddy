@@ -1,3 +1,13 @@
+/**
+ * React Query Configuration
+ * 
+ * Configures the global QueryClient for data fetching state management.
+ * Includes:
+ * - Default stale times and retry policies
+ * - A generic API request wrapper (apiRequest) for fetch operations
+ * - Error handling utilities
+ */
+
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {

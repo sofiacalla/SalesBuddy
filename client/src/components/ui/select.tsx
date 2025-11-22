@@ -1,3 +1,10 @@
+/**
+ * Select Component
+ * 
+ * A dropdown selection component built with Radix UI Select primitive.
+ * Provides a fully accessible, customizable select experience.
+ */
+
 "use client"
 
 import * as React from "react"

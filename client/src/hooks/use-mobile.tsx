@@ -1,3 +1,11 @@
+/**
+ * Mobile Detection Hook
+ * 
+ * A responsive utility hook that detects if the current viewport
+ * matches mobile breakpoint dimensions.
+ * Used for conditional rendering of mobile-specific UI elements.
+ */
+
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768

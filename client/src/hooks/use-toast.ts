@@ -1,3 +1,12 @@
+/**
+ * Toast Notification Hook
+ * 
+ * Provides the `useToast` hook and `toast` function for triggering
+ * toast notifications across the application.
+ * 
+ * Manages the state queue for displaying temporary alerts.
+ */
+
 import * as React from "react"
 
 import type {
