@@ -51,6 +51,7 @@ export function calculateForecast(
   let conservative = 0;
   let base = 0;
   let optimistic = 0;
+  let optimisticDelta = 0;
   let pipelineValue = 0;
   let committedValue = 0;
   let uncommittedValue = 0;
