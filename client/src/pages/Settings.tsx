@@ -24,58 +24,164 @@ export default function Settings() {
         <TabsContent value="guide" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Info className="w-5 h-5 text-primary" />
-                Getting Started
+              <CardTitle className="flex items-center gap-2 text-2xl text-primary">
+                <Info className="w-6 h-6 text-primary" />
+                Mastering Sales Buddy
               </CardTitle>
-              <CardDescription>
-                Welcome to Sales Buddy! Here is how to manage your weekly rhythm.
+              <CardDescription className="text-base">
+                A playbook for high-velocity sales teams. Move beyond data entry and start driving revenue.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-3">
-                <div className="bg-muted/30 p-4 rounded-lg border">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold mb-3">1</div>
-                  <h3 className="font-bold mb-2">Update Accounts</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Go to the <strong>Accounts</strong> tab to add new potential clients. Ensure contact details are accurate for AI outreach suggestions.
-                  </p>
-                </div>
-                <div className="bg-muted/30 p-4 rounded-lg border">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold mb-3">2</div>
-                  <h3 className="font-bold mb-2">Manage Pipeline</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Use the <strong>Pipeline</strong> view to drag deals between stages. Update "Next Steps" weekly to keep deals from going stale.
-                  </p>
-                </div>
-                <div className="bg-muted/30 p-4 rounded-lg border">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold mb-3">3</div>
-                  <h3 className="font-bold mb-2">Review Forecast</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Check the <strong>Dashboard</strong> every Monday. The "Conservative" forecast is your locked-in number; "Optimistic" is your stretch goal.
-                  </p>
+            <CardContent className="space-y-8">
+              
+              {/* Section 1: Philosophy */}
+              <div className="bg-primary/5 p-6 rounded-lg border border-primary/10">
+                <h3 className="text-lg font-bold text-foreground mb-2">Why Sales Buddy?</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Most CRMs are just databases. Sales Buddy is a <span className="font-semibold text-primary">performance engine</span>. 
+                  We stripped away the clutter to focus on the three things that actually matter: 
+                  <span className="font-semibold text-foreground"> Forecast Reliability</span>, 
+                  <span className="font-semibold text-foreground"> Pipeline Hygiene</span>, and 
+                  <span className="font-semibold text-foreground"> Deal Velocity</span>.
+                </p>
+              </div>
+
+              {/* Section 2: Compelling Use Cases */}
+              <div>
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  High-Impact Use Cases
+                </h3>
+                <div className="grid gap-6 md:grid-cols-2">
+                  
+                  {/* Use Case A */}
+                  <div className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">1</div>
+                      <h4 className="font-bold text-base">The "No-Surprise" Forecast Call</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Stop asking "what's closing?" and start managing risk.
+                    </p>
+                    <ul className="space-y-2 text-sm text-foreground/80">
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-500 mt-1">•</span>
+                        Use the <strong>Dashboard</strong> to see the exact gap between "Committed" and your quota.
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-500 mt-1">•</span>
+                        Click on <strong>"Top Risks"</strong> to see which committed deals are stale or at risk (AI-detected).
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-500 mt-1">•</span>
+                        Drill down into "Uncommitted" to find upside opportunities to bridge the gap.
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Use Case B */}
+                  <div className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">2</div>
+                      <h4 className="font-bold text-base">The "My Week" Focus Routine</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      For Reps: Eliminate decision fatigue every morning.
+                    </p>
+                    <ul className="space-y-2 text-sm text-foreground/80">
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 mt-1">•</span>
+                        Open the <strong>My Week</strong> tab first thing. The list is auto-sorted by priority (Stale &gt; Value).
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 mt-1">•</span>
+                        Use the <strong>Focus Wizard</strong> to update Next Steps, Confidence, and Notes in one flow.
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 mt-1">•</span>
+                        Clear the list to hit "Inbox Zero" for your pipeline.
+                      </li>
+                    </ul>
+                  </div>
+
+                   {/* Use Case C */}
+                   <div className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-sm">3</div>
+                      <h4 className="font-bold text-base">Pipeline Hygiene Fridays</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Enter the weekend with a clean slate and accurate data.
+                    </p>
+                    <ul className="space-y-2 text-sm text-foreground/80">
+                      <li className="flex items-start gap-2">
+                        <span className="text-orange-500 mt-1">•</span>
+                        Check the <strong>Hygiene Score</strong> on the dashboard. Is it below 90%?
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-orange-500 mt-1">•</span>
+                        Filter the <strong>Pipeline</strong> view by "Stale" or missing "Next Steps".
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-orange-500 mt-1">•</span>
+                        Update dates to ensure Monday's forecast is based on reality, not hope.
+                      </li>
+                    </ul>
+                  </div>
+
+                   {/* Use Case D */}
+                   <div className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-bold text-sm">4</div>
+                      <h4 className="font-bold text-base">Smart Coaching</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Turn managers into super-coaches with AI insights.
+                    </p>
+                    <ul className="space-y-2 text-sm text-foreground/80">
+                      <li className="flex items-start gap-2">
+                        <span className="text-green-500 mt-1">•</span>
+                        Review the <strong>Coaching Opportunities</strong> tile on the dashboard.
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-green-500 mt-1">•</span>
+                        Find specific reps struggling with "Negotiation Stagnation" or low "Win Rates".
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-green-500 mt-1">•</span>
+                        Use the suggested <strong>Action Plans</strong> in your 1:1s to drive specific behavioral changes.
+                      </li>
+                    </ul>
+                  </div>
+
                 </div>
               </div>
               
               <Separator />
               
+              {/* FAQ */}
               <div>
-                <h3 className="font-bold mb-4">Frequently Asked Questions</h3>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-sm font-semibold">How is the forecast calculated?</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Conservative forecast only includes High Confidence deals closing within 14 days. Base includes Medium confidence deals within 30 days.
+                <h3 className="font-bold mb-4 text-lg">Terminology & Concepts</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="p-4 bg-muted/30 rounded-md">
+                    <h4 className="text-sm font-bold text-foreground">Forecast Categories</h4>
+                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                      <strong>Committed:</strong> Deals in 'Committed' stage + 'Won'. Highly reliable.<br/>
+                      <strong>Uncommitted:</strong> Upside deals. Good for gap filling.<br/>
+                      <strong>Leads:</strong> Early stage, rarely count towards current month.
                     </p>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-semibold">What makes a deal "Stale"?</h4>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Any deal without a logged activity or update in the last 7 days is automatically flagged as stale.
+                  <div className="p-4 bg-muted/30 rounded-md">
+                    <h4 className="text-sm font-bold text-foreground">Deal Health</h4>
+                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                      <strong>Stale:</strong> No activity &gt; 7 days.<br/>
+                      <strong>Risk:</strong> High value but low engagement or stuck in stage.<br/>
+                      <strong>Hygiene:</strong> Completeness of data fields.
                     </p>
                   </div>
                 </div>
               </div>
+
             </CardContent>
           </Card>
         </TabsContent>
