@@ -55,101 +55,101 @@ export default function Settings() {
                 <div className="grid gap-6 md:grid-cols-2">
                   
                   {/* Use Case A */}
-                  <div className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">1</div>
-                      <h4 className="font-bold text-base">The "No-Surprise" Forecast Call</h4>
+                  <div className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-card">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">1</div>
+                      <h4 className="font-bold text-sm">The "No-Surprise" Forecast Call</h4>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-xs text-muted-foreground mb-2">
                       Stop asking "what's closing?" and start managing risk.
                     </p>
-                    <ul className="space-y-2 text-sm text-foreground/80">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">•</span>
-                        Use the <strong>Dashboard</strong> to see the exact gap between "Committed" and your quota.
+                    <ul className="space-y-1 text-xs text-foreground/90">
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-blue-500 mt-0.5">•</span>
+                        <span>Use the <strong>Dashboard</strong> to see the exact gap between "Committed" and your quota.</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">•</span>
-                        Click on <strong>"Top Risks"</strong> to see which committed deals are stale or at risk (AI-detected).
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-blue-500 mt-0.5">•</span>
+                        <span>Click on <strong>"Top Risks"</strong> to see which committed deals are stale or at risk (AI-detected).</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">•</span>
-                        Drill down into "Uncommitted" to find upside opportunities to bridge the gap.
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-blue-500 mt-0.5">•</span>
+                        <span>Drill down into "Uncommitted" to find upside opportunities to bridge the gap.</span>
                       </li>
                     </ul>
                   </div>
 
                   {/* Use Case B */}
-                  <div className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">2</div>
-                      <h4 className="font-bold text-base">The "My Week" Focus Routine</h4>
+                  <div className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-card">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">2</div>
+                      <h4 className="font-bold text-sm">The "My Week" Focus Routine</h4>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-xs text-muted-foreground mb-2">
                       For Reps: Eliminate decision fatigue every morning.
                     </p>
-                    <ul className="space-y-2 text-sm text-foreground/80">
-                      <li className="flex items-start gap-2">
-                        <span className="text-purple-500 mt-1">•</span>
-                        Open the <strong>My Week</strong> tab first thing. The list is auto-sorted by priority (Stale &gt; Value).
+                    <ul className="space-y-1 text-xs text-foreground/90">
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-purple-500 mt-0.5">•</span>
+                        <span>Open the <strong>My Week</strong> tab first thing. The list is auto-sorted by priority (Stale &gt; Value).</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-purple-500 mt-1">•</span>
-                        Use the <strong>Focus Wizard</strong> to update Next Steps, Confidence, and Notes in one flow.
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-purple-500 mt-0.5">•</span>
+                        <span>Use the <strong>Focus Wizard</strong> to update Next Steps, Confidence, and Notes in one flow.</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-purple-500 mt-1">•</span>
-                        Clear the list to hit "Inbox Zero" for your pipeline.
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-purple-500 mt-0.5">•</span>
+                        <span>Clear the list to hit "Inbox Zero" for your pipeline.</span>
                       </li>
                     </ul>
                   </div>
 
                    {/* Use Case C */}
-                   <div className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-sm">3</div>
-                      <h4 className="font-bold text-base">Pipeline Hygiene Fridays</h4>
+                   <div className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-card">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-xs">3</div>
+                      <h4 className="font-bold text-sm">Pipeline Hygiene Fridays</h4>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-xs text-muted-foreground mb-2">
                       Enter the weekend with a clean slate and accurate data.
                     </p>
-                    <ul className="space-y-2 text-sm text-foreground/80">
-                      <li className="flex items-start gap-2">
-                        <span className="text-orange-500 mt-1">•</span>
-                        Check the <strong>Hygiene Score</strong> on the dashboard. Is it below 90%?
+                    <ul className="space-y-1 text-xs text-foreground/90">
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-orange-500 mt-0.5">•</span>
+                        <span>Check the <strong>Hygiene Score</strong> on the dashboard. Is it below 90%?</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-orange-500 mt-1">•</span>
-                        Filter the <strong>Pipeline</strong> view by "Stale" or missing "Next Steps".
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-orange-500 mt-0.5">•</span>
+                        <span>Filter the <strong>Pipeline</strong> view by "Stale" or missing "Next Steps".</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-orange-500 mt-1">•</span>
-                        Update dates to ensure Monday's forecast is based on reality, not hope.
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-orange-500 mt-0.5">•</span>
+                        <span>Update dates to ensure Monday's forecast is based on reality, not hope.</span>
                       </li>
                     </ul>
                   </div>
 
                    {/* Use Case D */}
-                   <div className="border rounded-lg p-5 hover:shadow-md transition-shadow bg-card">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-bold text-sm">4</div>
-                      <h4 className="font-bold text-base">Smart Coaching</h4>
+                   <div className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-card">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-bold text-xs">4</div>
+                      <h4 className="font-bold text-sm">Smart Coaching</h4>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-xs text-muted-foreground mb-2">
                       Turn managers into super-coaches with AI insights.
                     </p>
-                    <ul className="space-y-2 text-sm text-foreground/80">
-                      <li className="flex items-start gap-2">
-                        <span className="text-green-500 mt-1">•</span>
-                        Review the <strong>Coaching Opportunities</strong> tile on the dashboard.
+                    <ul className="space-y-1 text-xs text-foreground/90">
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-green-500 mt-0.5">•</span>
+                        <span>Review the <strong>Coaching Opportunities</strong> tile on the dashboard.</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-green-500 mt-1">•</span>
-                        Find specific reps struggling with "Negotiation Stagnation" or low "Win Rates".
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-green-500 mt-0.5">•</span>
+                        <span>Find specific reps struggling with "Negotiation Stagnation" or low "Win Rates".</span>
                       </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-green-500 mt-1">•</span>
-                        Use the suggested <strong>Action Plans</strong> in your 1:1s to drive specific behavioral changes.
+                      <li className="flex items-start gap-1.5">
+                        <span className="text-green-500 mt-0.5">•</span>
+                        <span>Use the suggested <strong>Action Plans</strong> in your 1:1s to drive specific behavioral changes.</span>
                       </li>
                     </ul>
                   </div>
