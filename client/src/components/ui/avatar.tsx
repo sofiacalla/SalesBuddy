@@ -1,3 +1,16 @@
+/**
+ * Avatar Component
+ * 
+ * A user profile image component with fallback support.
+ * Built with Radix UI Avatar primitive.
+ * 
+ * Usage:
+ * <Avatar>
+ *   <AvatarImage src="..." />
+ *   <AvatarFallback>CN</AvatarFallback>
+ * </Avatar>
+ */
+
 "use client"
 
 import * as React from "react"

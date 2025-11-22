@@ -1,3 +1,10 @@
+/**
+ * Textarea Component
+ * 
+ * Multi-line text input component.
+ * Wraps the native HTML <textarea> element with standard design system styling.
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

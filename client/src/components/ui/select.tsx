@@ -3,6 +3,12 @@
  * 
  * A dropdown selection component built with Radix UI Select primitive.
  * Provides a fully accessible, customizable select experience.
+ * 
+ * Includes:
+ * - Trigger: The button that opens the select
+ * - Content: The dropdown menu
+ * - Item: Individual options
+ * - Group/Label: For categorized options
  */
 
 "use client"

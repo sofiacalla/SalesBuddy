@@ -1,3 +1,16 @@
+/**
+ * Tabs Component
+ * 
+ * A layered tab interface for switching between different views or contexts.
+ * Built with Radix UI Tabs primitive.
+ * 
+ * Components:
+ * - Tabs: Root container
+ * - TabsList: Container for triggers
+ * - TabsTrigger: The clickable tab
+ * - TabsContent: The content panel associated with a trigger
+ */
+
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 

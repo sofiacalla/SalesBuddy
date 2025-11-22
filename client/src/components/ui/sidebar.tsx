@@ -1,3 +1,14 @@
+/**
+ * Sidebar Component System
+ * 
+ * A comprehensive sidebar layout system for dashboards.
+ * Features:
+ * - Collapsible state management (expanded/collapsed)
+ * - Mobile responsiveness (converts to Drawer/Sheet on mobile)
+ * - Grouping, Menus, and Submenus
+ * - Cookie-based persistence for sidebar state
+ */
+
 "use client"
 
 import * as React from "react"

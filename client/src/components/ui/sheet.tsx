@@ -1,3 +1,11 @@
+/**
+ * Sheet Component (Sidebar/Drawer)
+ * 
+ * A panel that slides out from the edge of the screen.
+ * Built with Radix UI Dialog primitive.
+ * Used for navigation menus, mobile sidebars, or detail views.
+ */
+
 "use client"
 
 import * as React from "react"

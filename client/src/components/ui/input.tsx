@@ -3,6 +3,8 @@
  * 
  * Standard HTML input wrapper with custom styling and focus states.
  * Supports all standard HTML input attributes.
+ * 
+ * Styled to match the design system's form elements.
  */
 
 import * as React from "react"

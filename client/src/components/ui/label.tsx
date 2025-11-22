@@ -1,3 +1,11 @@
+/**
+ * Label Component
+ * 
+ * Accessible label for form controls.
+ * Built with Radix UI Label primitive.
+ * Ensures correct association and behavior with inputs.
+ */
+
 "use client"
 
 import * as React from "react"

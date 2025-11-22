@@ -3,6 +3,16 @@
  * 
  * A flexible container component for grouping related content.
  * Includes sub-components for Header, Title, Content, and Footer.
+ * 
+ * Usage:
+ * <Card>
+ *   <CardHeader>
+ *     <CardTitle>Title</CardTitle>
+ *     <CardDescription>Description</CardDescription>
+ *   </CardHeader>
+ *   <CardContent>...</CardContent>
+ *   <CardFooter>...</CardFooter>
+ * </Card>
  */
 
 import * as React from "react"

@@ -2,7 +2,13 @@
  * Dialog Component
  * 
  * A modal dialog overlay built with Radix UI Dialog primitive.
- * Used for critical interactions requiring user focus (alerts, forms).
+ * Used for critical interactions requiring user focus (alerts, forms, confirmations).
+ * 
+ * Includes:
+ * - Overlay: The backdrop
+ * - Content: The modal container
+ * - Header/Footer: Standardized layout sections
+ * - Title/Description: For accessibility and context
  */
 
 import * as React from "react"
