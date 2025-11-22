@@ -1,3 +1,13 @@
+/**
+ * Transactions Page
+ * 
+ * Displays the full history of financial transactions.
+ * Features:
+ * - Search functionality (by description or amount)
+ * - Category filtering
+ * - Detailed list view with status indicators
+ */
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,10 +18,12 @@ import { Search, Filter, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Transactions() {
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const transactions = getTransactions();
+  // -- State --
+  const [search, setSearch] = useState(""); // Search text input
+  const [categoryFilter, setCategoryFilter] = useState("all"); // Category dropdown value
+  const transactions = getTransactions(); // Fetch data
 
+  // -- Filtering Logic --
   const filteredTransactions = transactions.filter(t => {
     const matchesSearch = t.description.toLowerCase().includes(search.toLowerCase()) || 
                           t.amount.toString().includes(search);
@@ -19,10 +31,12 @@ export default function Transactions() {
     return matchesSearch && matchesCategory;
   });
 
+  // Extract unique categories for the filter dropdown
   const categories = Array.from(new Set(transactions.map(t => t.category)));
 
   return (
     <div className="space-y-6">
+      {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground">Transactions</h1>
@@ -32,7 +46,9 @@ export default function Transactions() {
 
       <Card>
         <CardHeader className="pb-4">
+           {/* Filters Bar */}
            <div className="flex flex-col md:flex-row gap-4">
+            {/* Search Input */}
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -42,6 +58,7 @@ export default function Transactions() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
+            {/* Category Dropdown */}
             <div className="w-full md:w-[200px]">
                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger>
@@ -59,16 +76,19 @@ export default function Transactions() {
            </div>
         </CardHeader>
         <CardContent>
+          {/* Transactions List */}
           <div className="space-y-4">
             {filteredTransactions.map((t) => (
               <div key={t.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors bg-card">
                 <div className="flex items-center gap-4">
+                  {/* Icon */}
                   <div className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center shrink-0",
                     t.type === 'income' ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-600"
                   )}>
                     {t.type === 'income' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                   </div>
+                  {/* Details */}
                   <div>
                     <p className="font-medium text-sm md:text-base">{t.description}</p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -78,6 +98,7 @@ export default function Transactions() {
                     </div>
                   </div>
                 </div>
+                {/* Amount & Status */}
                 <div className="text-right">
                   <span className={cn(
                     "font-bold block",

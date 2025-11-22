@@ -1,10 +1,13 @@
 /**
  * Toast Notification Hook
  * 
- * Provides the `useToast` hook and `toast` function for triggering
- * toast notifications across the application.
+ * Provides a global notification system for the application.
+ * Exports:
+ * - useToast: Hook to subscribe to toast state in components
+ * - toast: Function to trigger a new toast from anywhere
  * 
- * Manages the state queue for displaying temporary alerts.
+ * Manages a queue of temporary alert messages (toasts) that auto-dismiss.
+ * Implementation based on a reducer pattern for predictable state updates.
  */
 
 import * as React from "react"
@@ -24,6 +27,7 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
+// Action Types for the Reducer
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",
@@ -33,6 +37,7 @@ const actionTypes = {
 
 let count = 0
 
+// Unique ID Generator
 function genId() {
   count = (count + 1) % Number.MAX_SAFE_INTEGER
   return count.toString()
@@ -64,6 +69,10 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
+/**
+ * Schedules a toast for removal after a delay.
+ * Prevents memory leaks by tracking timeouts.
+ */
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
     return
@@ -80,6 +89,10 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
+/**
+ * State Reducer
+ * Handles adding, updating, dismissing, and removing toasts.
+ */
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
@@ -99,8 +112,7 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
+      // Trigger removal queue side-effect
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -135,6 +147,7 @@ export const reducer = (state: State, action: Action): State => {
   }
 }
 
+// Global listeners array for state subscriptions
 const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
@@ -148,6 +161,9 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
+/**
+ * Public API to trigger a toast
+ */
 function toast({ ...props }: Toast) {
   const id = genId()
 
@@ -177,6 +193,9 @@ function toast({ ...props }: Toast) {
   }
 }
 
+/**
+ * React Hook for components to consume toast state
+ */
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

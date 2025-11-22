@@ -1,3 +1,13 @@
+/**
+ * Accounts Page
+ * 
+ * Manages the list of connected financial accounts.
+ * Features:
+ * - Grid view of all accounts (Checking, Savings, Credit, Investment)
+ * - "Add Account" functionality via a Dialog modal
+ * - Visual indicators for account types
+ */
+
 import { useState } from "react";
 import { getAccounts, Account } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,11 +21,13 @@ import { Plus, Wallet, CreditCard, DollarSign, TrendingUp, MoreHorizontal } from
 import { useToast } from "@/hooks/use-toast";
 
 export default function Accounts() {
+  // -- State --
   const [accounts, setAccounts] = useState<Account[]>(getAccounts());
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
   const { toast } = useToast();
   const [newAccount, setNewAccount] = useState<Partial<Account>>({ type: 'checking' });
 
+  // Helper: Get icon based on account type
   const getIcon = (type: string) => {
     switch (type) {
       case 'checking': return <Wallet className="w-5 h-5" />;
@@ -26,30 +38,36 @@ export default function Accounts() {
     }
   };
 
+  // Handler: Add new account
+  // Simulates adding an account by updating local state
   const handleAddAccount = () => {
+      // Simple Validation
       if (!newAccount.name || !newAccount.institution) {
           toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
           return;
       }
 
+      // Create new account object
       const account: Account = {
           id: `acc-new-${Date.now()}`,
           name: newAccount.name,
           type: newAccount.type as any,
-          balance: Math.floor(Math.random() * 10000),
+          balance: Math.floor(Math.random() * 10000), // Mock random balance
           accountNumber: `**** ${Math.floor(1000 + Math.random() * 9000)}`,
           institution: newAccount.institution,
-          color: "hsl(221.2 83.2% 53.3%)"
+          color: "hsl(221.2 83.2% 53.3%)" // Default blue color
       };
 
+      // Update state
       setAccounts([...accounts, account]);
       setIsAddAccountOpen(false);
       toast({ title: "Success", description: "Account added successfully" });
-      setNewAccount({ type: 'checking' });
+      setNewAccount({ type: 'checking' }); // Reset form
   };
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-heading font-bold text-foreground">Accounts</h1>
@@ -61,6 +79,7 @@ export default function Accounts() {
         </Button>
       </div>
 
+      {/* Accounts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {accounts.map((account) => (
           <Card key={account.id} className="relative overflow-hidden group hover:shadow-md transition-all border-t-4" style={{ borderTopColor: account.color }}>
@@ -81,6 +100,7 @@ export default function Accounts() {
         ))}
       </div>
 
+      {/* Add Account Modal */}
       <Dialog open={isAddAccountOpen} onOpenChange={setIsAddAccountOpen}>
         <DialogContent>
           <DialogHeader>
