@@ -1,3 +1,17 @@
+//
+//* Main server file for the Express application.
+//* - Sets up logging with timestamps for server activity.
+//* - Configures middleware to parse JSON and URL-encoded requests,
+// *   while preserving the raw request body.
+//* - Logs API requests and responses with duration and status.
+//* - Registers routes from the routes module.
+// * - Provides centralized error handling for API requests.
+// * - Runs additional setup logic passed into runApp().
+// * - Starts the server on the port defined in the PORT environment variable
+// *   (default 5000), listening on all interfaces.
+// */
+//
+
 import { type Server } from "node:http";
 
 import express, { type Express, type Request, Response, NextFunction } from "express";

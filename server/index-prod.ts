@@ -1,3 +1,10 @@
+// This file configures the Express server to serve static files.
+// - Imports required modules (fs, http Server, path, Express).
+// - Defines serveStatic() to serve files from the "public" build directory.
+// - Throws an error if the build directory does not exist (ensures client is built first).
+// - Uses express.static() to serve all files in the "public" folder.
+// - Falls back to serving index.html for any unmatched routes (supporting client-side routing).
+// - Finally, calls runApp(serveStatic) to start the application with this static file setup.
 import fs from "node:fs";
 import { type Server } from "node:http";
 import path from "node:path";
