@@ -2,13 +2,8 @@
  * Mobile Detection Hook
  * 
  * A responsive utility hook that detects if the current viewport
- * matches mobile breakpoint dimensions (default < 768px).
- * 
- * Usage:
- * const isMobile = useIsMobile();
- * if (isMobile) { ... }
- * 
- * Uses window.matchMedia for performant listener attachment.
+ * matches mobile breakpoint dimensions.
+ * Used for conditional rendering of mobile-specific UI elements.
  */
 
 import * as React from "react"
@@ -23,12 +18,8 @@ export function useIsMobile() {
     const onChange = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
-    
-    // Initial check
     mql.addEventListener("change", onChange)
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    
-    // Cleanup listener
     return () => mql.removeEventListener("change", onChange)
   }, [])
 

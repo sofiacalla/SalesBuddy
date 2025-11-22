@@ -1,13 +1,3 @@
-/**
- * Badge Component
- * 
- * A small status indicator or label.
- * Supports variants: default, secondary, destructive, outline.
- * 
- * Usage:
- * <Badge variant="destructive">Error</Badge>
- */
-
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 

@@ -1,12 +1,3 @@
-/**
- * Progress Component
- * 
- * A progress bar indicator built with Radix UI Progress primitive.
- * Displays completion status of a task or process.
- * 
- * Supports customizable color and height via className.
- */
-
 "use client"
 
 import * as React from "react"

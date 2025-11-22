@@ -1,32 +1,28 @@
 /**
- * Main Application Layout Component
+ * Main Application Layout
  * 
- * This component provides the persistent shell for the application.
- * It includes:
- * 1. A persistent Sidebar for navigation
- * 2. A top Header for global actions (Search, Notifications)
- * 3. A main content area that renders the current page
- * 
- * It handles responsive behavior and global search functionality.
+ * Wraps all pages with:
+ * 1. Sidebar Navigation: persistent navigation links
+ * 2. Top Header: Global search and user profile
+ * 3. Global Search: Instant search for Deals and Accounts
+ * 4. Responsive Container: Handles scrolling and layout structure
  */
 
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, CreditCard, PieChart, Settings, Bell, Search, Wallet, Target, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, BarChart3, Settings, Bell, Search, CheckCircle2, Building2, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getTransactions, getAccounts } from "@/lib/mockData";
+import { getDeals, getAccounts } from "@/lib/mockData";
+import logo from "@assets/generated_images/minimalist_geometric_logo_for_sales_buddy_crm.png";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  // -- State Management --
-  const [location, setLocation] = useLocation(); // Current URL path
-  const [searchQuery, setSearchQuery] = useState(""); // Global search input
-  const [searchResults, setSearchResults] = useState<any[]>([]); // Live search results
-  const [showResults, setShowResults] = useState(false); // Dropdown visibility
-  const searchRef = useRef<HTMLDivElement>(null); // Ref for click-outside detection
+  const [location, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  // -- Effects --
-
-  // Effect: Handle clicks outside the search box to close the dropdown
+  // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -40,60 +36,51 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Effect: Live Search Logic
-  // Filters transactions and accounts based on user input
+  // Live Search Implementation
   useEffect(() => {
     if (searchQuery.length < 2) {
       setSearchResults([]);
       return;
     }
     
-    // Perform search against mock data
-    const transactions = getTransactions().filter(t => t.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    // Search in both Deals and Accounts
+    const deals = getDeals().filter(d => d.title.toLowerCase().includes(searchQuery.toLowerCase()));
     const accounts = getAccounts().filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    // Combine results, prioritizing accounts, and limit to 6 items
+    // Combine and limit results
     setSearchResults([
       ...accounts.map(a => ({ type: 'account', data: a })),
-      ...transactions.map(t => ({ type: 'transaction', data: t }))
+      ...deals.map(d => ({ type: 'deal', data: d }))
     ].slice(0, 6));
   }, [searchQuery]);
 
-  // -- Handlers --
-
-  // Navigation handler for search results
   const handleResultClick = (result: any) => {
     if (result.type === 'account') {
       setLocation('/accounts');
     } else {
-      setLocation('/transactions');
+      setLocation('/pipeline');
     }
     setShowResults(false);
     setSearchQuery("");
   };
 
-  // Navigation Menu Configuration
   const navItems = [
-    { href: "/", icon: LayoutDashboard, label: "Overview" },
-    { href: "/transactions", icon: CreditCard, label: "Transactions" },
-    { href: "/budget", icon: PieChart, label: "Budget" },
-    { href: "/goals", icon: Target, label: "Goals" }, // Placeholder link
+    { href: "/", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/my-week", icon: CheckCircle2, label: "My Week" },
+    { href: "/accounts", icon: Users, label: "Accounts" },
+    { href: "/pipeline", icon: BarChart3, label: "Pipeline" },
     { href: "/settings", icon: Settings, label: "Settings" },
   ];
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground flex">
-      {/* --- Sidebar Section --- */}
+      {/* Sidebar */}
       <aside className="w-64 bg-sidebar text-sidebar-foreground flex flex-col border-r border-sidebar-border shrink-0 transition-all duration-300 ease-in-out">
-        {/* Logo Area */}
         <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <Wallet className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="font-heading font-bold text-xl tracking-tight">FinTrack</span>
+          <img src={logo} alt="Sales Buddy" className="w-8 h-8 rounded-sm" />
+          <span className="font-heading font-bold text-xl tracking-tight">Sales Buddy</span>
         </div>
 
-        {/* Navigation Links */}
         <nav className="flex-1 px-4 py-4 space-y-2">
           {navItems.map((item) => {
             const isActive = location === item.href;
@@ -115,34 +102,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* User Profile Footer */}
         <div className="p-4 border-t border-sidebar-border">
           <div className="flex items-center gap-3 p-2 rounded-md bg-sidebar-accent/50">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-inner">
-              JD
+            <div className="w-8 h-8 rounded-full bg-sidebar-primary flex items-center justify-center text-xs font-bold">
+              JS
             </div>
             <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-medium truncate">John Doe</p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">Premium Member</p>
+              <p className="text-sm font-medium truncate">John Smith</p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">Sales Manager</p>
             </div>
-            <LogOut className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-pointer" />
           </div>
         </div>
       </aside>
 
-      {/* --- Main Content Area --- */}
+      {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
-        
-        {/* Top Header Bar */}
+        {/* Top Header */}
         <header className="h-16 border-b bg-background/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-10">
-          
-          {/* Global Search Bar */}
           <div className="flex items-center gap-4 w-full max-w-md">
             <div className="relative w-full" ref={searchRef}>
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search transactions..."
+                placeholder="Search accounts, deals..."
                 className="w-full bg-muted/50 pl-9 pr-4 py-2 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                 value={searchQuery}
                 onChange={(e) => {
@@ -152,13 +134,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 onFocus={() => setShowResults(true)}
               />
               
-              {/* Search Results Dropdown Panel */}
+              {/* Search Results Dropdown */}
               {showResults && searchQuery.length >= 2 && (
                 <div className="absolute top-full left-0 w-full mt-2 bg-popover rounded-md border shadow-lg py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                   {searchResults.length > 0 ? (
                     <>
                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Results
+                        Best Matches
                       </div>
                       {searchResults.map((result, idx) => (
                         <button
@@ -167,16 +149,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                           onClick={() => handleResultClick(result)}
                         >
                           {result.type === 'account' ? (
-                            <Wallet className="w-4 h-4 text-blue-500 shrink-0" />
+                            <Building2 className="w-4 h-4 text-blue-500 shrink-0" />
                           ) : (
-                            <CreditCard className="w-4 h-4 text-green-500 shrink-0" />
+                            <FileText className="w-4 h-4 text-green-500 shrink-0" />
                           )}
                           <div className="truncate">
                             <div className="font-medium text-foreground">
-                              {result.type === 'account' ? result.data.name : result.data.description}
+                              {result.type === 'account' ? result.data.name : result.data.title}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {result.type === 'account' ? 'Account' : `Transaction • $${result.data.amount}`}
+                              {result.type === 'account' ? 'Account' : `Deal • ${result.data.stage}`}
                             </div>
                           </div>
                         </button>
@@ -191,17 +173,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )}
             </div>
           </div>
-
-          {/* Header Actions */}
           <div className="flex items-center gap-4">
             <button className="relative p-2 rounded-full hover:bg-muted transition-colors">
               <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border-2 border-background"></span>
             </button>
           </div>
         </header>
 
-        {/* Scrollable Page Content */}
+        {/* Scrollable Area */}
         <div className="flex-1 overflow-auto p-6">
           <div className="mx-auto max-w-7xl space-y-6 animate-in fade-in duration-500 slide-in-from-bottom-4">
             {children}

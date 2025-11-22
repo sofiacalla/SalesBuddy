@@ -2,9 +2,7 @@
  * Button Component
  * 
  * A reusable button component with variant support (default, destructive, outline, etc.).
- * Built on top of Radix UI Slot for polymorphism (can render as 'a' tag or other elements).
- * 
- * Supports 'variant' and 'size' props via class-variance-authority (cva).
+ * Built on top of Radix UI Slot for polymorphism.
  */
 
 import * as React from "react"

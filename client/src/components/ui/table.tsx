@@ -4,12 +4,6 @@
  * A responsive data table component with sub-components for 
  * Header, Body, Row, Cell, and Caption.
  * Styled for readability and data density.
- * 
- * Usage:
- * <Table>
- *   <TableHeader><TableRow><TableHead>...</TableHead></TableRow></TableHeader>
- *   <TableBody><TableRow><TableCell>...</TableCell></TableRow></TableBody>
- * </Table>
  */
 
 import * as React from "react"
