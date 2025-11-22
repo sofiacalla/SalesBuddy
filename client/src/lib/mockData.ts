@@ -278,6 +278,28 @@ const generateAnnualDeals = (): Deal[] => {
                 probability: 100,
                 activities: []
             });
+
+            // 4. Force Lead (Early Pipeline)
+            deals.push({
+                id: `deal-forced-lead-${dealCounter++}`,
+                accountId: forceAccount.id,
+                ownerId: forceOwner.id,
+                ownerName: forceOwner.name,
+                title: `${forceAccount.name} - New Opportunity`,
+                amount: 50000 + Math.floor(Math.random() * 50000),
+                currency: "USD",
+                stage: "LEAD",
+                confidence: "LOW",
+                // Ensure it lands in this month for the chart to pick it up
+                closeDate: addDays(month, 28).toISOString(), 
+                lastActivityDate: subDays(now, 2).toISOString(),
+                nextStep: "Qualification Call",
+                nextStepDate: addDays(now, 2).toISOString(),
+                createdAt: subDays(month, 10).toISOString(),
+                updatedAt: subDays(now, 1).toISOString(),
+                probability: 20,
+                activities: []
+            });
     });
     
     return deals;
