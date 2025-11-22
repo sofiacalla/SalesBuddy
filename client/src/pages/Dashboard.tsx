@@ -66,6 +66,7 @@ export default function Dashboard() {
     { name: "Closed Won", value: metrics.closedWon, color: "hsl(var(--chart-2))" }, // Green
     { name: "Committed", value: metrics.committedValue, color: "hsl(var(--chart-1))" }, // Blue
     { name: "Uncommitted", value: metrics.uncommittedValue, color: "hsl(var(--chart-3))" }, // Orange/Yellow
+    { name: "Leads", value: metrics.leadsValue, color: "hsl(var(--chart-4))" }, // Purple/Other
   ];
 
   // Chart Data: Historical Trend (for Growth Tracking)
@@ -251,7 +252,7 @@ export default function Dashboard() {
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Forecast Composition ({format(new Date(selectedMonth + "-01"), 'MMMM yyyy')})</CardTitle>
-            <CardDescription>Breakdown of Committed vs. Uncommitted revenue for {format(new Date(selectedMonth + "-01"), 'MMMM yyyy')}</CardDescription>
+            <CardDescription>Breakdown of Committed, Uncommitted, and Leads for {format(new Date(selectedMonth + "-01"), 'MMMM yyyy')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">

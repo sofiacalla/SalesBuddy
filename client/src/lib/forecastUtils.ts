@@ -26,6 +26,7 @@ export interface DashboardMetrics {
   pipelineValue: number;
   committedValue: number; // High confidence deals
   uncommittedValue: number; // Low/Medium confidence deals
+  leadsValue: number; // Lead stage deals
   closedWon: number;
   mape: number; // Forecast Reliability
   hygieneScore: number; // % complete
@@ -55,6 +56,7 @@ export function calculateForecast(
   let pipelineValue = 0;
   let committedValue = 0;
   let uncommittedValue = 0;
+  let leadsValue = 0;
   let closedWon = 0;
   let closedLost = 0;
 
@@ -142,7 +144,7 @@ export function calculateForecast(
     } else if (deal.stage === "LEAD") {
       // Leads generally don't count towards monthly forecast unless highly optimistic
       // We'll count them in pipeline value but maybe not in forecast buckets yet
-      uncommittedValue += deal.amount;
+      leadsValue += deal.amount;
     }
   });
 
@@ -158,6 +160,7 @@ export function calculateForecast(
     pipelineValue: pipelineValue + realizedRevenue, // Total value of active + won for this month
     committedValue: committedValue + realizedRevenue,
     uncommittedValue,
+    leadsValue,
     closedWon,
     mape,
     hygieneScore,
