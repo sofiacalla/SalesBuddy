@@ -250,7 +250,7 @@ export default function Dashboard() {
         {/* Chart: Pipeline Composition */}
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Forecast Composition ({format(new Date(selectedMonth + "-01"), 'MMMM')})</CardTitle>
+            <CardTitle>Forecast Composition ({format(new Date(selectedMonth + "-01"), 'MMMM yyyy')})</CardTitle>
             <CardDescription>Breakdown of Committed vs. Uncommitted revenue for {format(new Date(selectedMonth + "-01"), 'MMMM yyyy')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">

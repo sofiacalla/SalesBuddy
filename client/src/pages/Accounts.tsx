@@ -459,9 +459,9 @@ export default function Accounts() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="DISCOVERY">Discovery</SelectItem>
-                        <SelectItem value="PROPOSAL">Proposal</SelectItem>
-                        <SelectItem value="NEGOTIATION">Negotiation</SelectItem>
+                        <SelectItem value="LEAD">Lead</SelectItem>
+                        <SelectItem value="UNCOMMITTED">Uncommitted</SelectItem>
+                        <SelectItem value="COMMITTED">Committed</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

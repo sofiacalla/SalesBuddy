@@ -63,12 +63,12 @@ export function calculateForecast(
   // Here we'll filter active deals by the target month's close date for the forecast buckets.
   
   const activeDeals = deals.filter(d => 
-    d.stage !== "CLOSED_WON" && 
-    d.stage !== "CLOSED_LOST"
+    d.stage !== "WON" && 
+    d.stage !== "LOST"
   );
 
-  const wonDeals = deals.filter(d => d.stage === "CLOSED_WON");
-  const lostDeals = deals.filter(d => d.stage === "CLOSED_LOST");
+  const wonDeals = deals.filter(d => d.stage === "WON");
+  const lostDeals = deals.filter(d => d.stage === "LOST");
   
   // --- Metric: Win Rate ---
   const totalClosed = wonDeals.length + lostDeals.length;
@@ -122,62 +122,33 @@ export function calculateForecast(
   closedWon = realizedRevenue;
 
   dealsInTargetMonth.forEach(deal => {
-    const daysSinceActivity = differenceInDays(now, parseISO(deal.lastActivityDate));
-    const daysToNextStep = differenceInDays(parseISO(deal.nextStepDate), now);
-    
-    const isHigh = deal.confidence === "HIGH";
-    const isMedium = deal.confidence === "MEDIUM";
-    const isLow = deal.confidence === "LOW";
-    
     // Pipeline Segmentation
     pipelineValue += deal.amount;
-    if (isHigh) {
+    
+    // DIRECT MAPPING: Stage directly correlates to forecast category now
+    if (deal.stage === "COMMITTED") {
       committedValue += deal.amount;
-    } else {
+      // Base includes Committed + Won
+      base += deal.amount; 
+      // Conservative only includes very rigorous Committed deals (e.g. High Conf)
+      if (deal.confidence === "HIGH") {
+          conservative += deal.amount;
+      }
+    } else if (deal.stage === "UNCOMMITTED") {
+      uncommittedValue += deal.amount;
+      // Optimistic includes Uncommitted
+      optimisticDelta += deal.amount;
+    } else if (deal.stage === "LEAD") {
+      // Leads generally don't count towards monthly forecast unless highly optimistic
+      // We'll count them in pipeline value but maybe not in forecast buckets yet
       uncommittedValue += deal.amount;
     }
-
-    // Conservative Logic
-    // Rules: High Conf AND Next Step <= 14 days AND Not Stale
-    if (isHigh && daysToNextStep <= 14 && daysSinceActivity <= STALE_THRESHOLD_DAYS) {
-      conservative += deal.amount;
-    }
-    
-    // Base Logic
-    // Rules: High/Medium Conf AND Next Step <= 30 days
-    if ((isHigh || isMedium) && daysToNextStep <= 30) {
-      base += deal.amount;
-    }
-    
-    // Optimistic Logic (Delta calculation)
-    // Rules: Base + (Low Conf OR Early Stage High Value)
-    // We calculate the delta to add to Base
-    // Note: Logic simplified for standard 'Optimistic' view which usually includes everything reasonable
   });
 
-  // Calculate Optimistic separately to ensure it's a superset properly
-  let optimisticDelta = 0;
-  dealsInTargetMonth.forEach(deal => {
-    const daysToNextStep = differenceInDays(parseISO(deal.nextStepDate), now);
-    const isHigh = deal.confidence === "HIGH";
-    const isMedium = deal.confidence === "MEDIUM";
-    
-    // Was this deal included in Base?
-    const inBase = (isHigh || isMedium) && daysToNextStep <= 30;
-    
-    if (!inBase) {
-       // Add if it's Low confidence or a big early stage deal
-       if (deal.confidence === "LOW" || (deal.amount > 100000 && deal.stage === "DISCOVERY")) {
-         optimisticDelta += deal.amount;
-       }
-    }
-  });
-
-  // Add realized revenue to forecast because "Forecast" usually means "End of Month Landing"
-  // So it should be (Already Won) + (Predicted to Win)
+  // Add realized revenue to forecast
   conservative += realizedRevenue;
-  base += realizedRevenue;
-  optimistic = base + optimisticDelta;
+  base += realizedRevenue; // Base = Won + Committed
+  optimistic = base + optimisticDelta; // Optimistic = Base + Uncommitted
 
   return {
     conservative,

@@ -19,8 +19,8 @@ import { addDays, subDays, subMonths, addMonths, format, eachMonthOfInterval, st
 // Confidence levels for deal probability
 export type Confidence = "HIGH" | "MEDIUM" | "LOW";
 
-// Sales stages in the pipeline
-export type Stage = "LEAD" | "DISCOVERY" | "PROPOSAL" | "NEGOTIATION" | "CLOSED_WON" | "CLOSED_LOST";
+// Sales stages in the pipeline - SIMPLIFIED
+export type Stage = "LEAD" | "UNCOMMITTED" | "COMMITTED" | "WON" | "LOST";
 
 // Account information structure
 export interface Account {
@@ -130,16 +130,16 @@ const generateAnnualDeals = (): Deal[] => {
     const months = eachMonthOfInterval({ start, end });
     
     const dealTemplates = [
-        { title: "Global Fleet Expansion", amount: 450000, stage: "NEGOTIATION", confidence: "HIGH" },
-        { title: "Annual Maintenance Renewal", amount: 120000, stage: "PROPOSAL", confidence: "MEDIUM" },
-        { title: "New Logistics Hub Setup", amount: 850000, stage: "DISCOVERY", confidence: "LOW" },
-        { title: "Enterprise Software License", amount: 200000, stage: "CLOSED_WON", confidence: "HIGH" },
-        { title: "Staff Training Program", amount: 25000, stage: "PROPOSAL", confidence: "MEDIUM" },
-        { title: "Global Tracking System Implementation", amount: 1200000, stage: "NEGOTIATION", confidence: "HIGH" },
-        { title: "Cloud Infrastructure Upgrade", amount: 600000, stage: "DISCOVERY", confidence: "LOW" },
-        { title: "Q4 Equipment Supply", amount: 350000, stage: "PROPOSAL", confidence: "MEDIUM" },
-        { title: "Premium Support Renewal", amount: 50000, stage: "NEGOTIATION", confidence: "HIGH" },
-        { title: "Strategic Consulting Project", amount: 75000, stage: "CLOSED_WON", confidence: "HIGH" }
+        { title: "Global Fleet Expansion", amount: 450000, stage: "COMMITTED", confidence: "HIGH" },
+        { title: "Annual Maintenance Renewal", amount: 120000, stage: "UNCOMMITTED", confidence: "MEDIUM" },
+        { title: "New Logistics Hub Setup", amount: 850000, stage: "LEAD", confidence: "LOW" },
+        { title: "Enterprise Software License", amount: 200000, stage: "WON", confidence: "HIGH" },
+        { title: "Staff Training Program", amount: 25000, stage: "UNCOMMITTED", confidence: "MEDIUM" },
+        { title: "Global Tracking System Implementation", amount: 1200000, stage: "COMMITTED", confidence: "HIGH" },
+        { title: "Cloud Infrastructure Upgrade", amount: 600000, stage: "LEAD", confidence: "LOW" },
+        { title: "Q4 Equipment Supply", amount: 350000, stage: "UNCOMMITTED", confidence: "MEDIUM" },
+        { title: "Premium Support Renewal", amount: 50000, stage: "COMMITTED", confidence: "HIGH" },
+        { title: "Strategic Consulting Project", amount: 75000, stage: "WON", confidence: "HIGH" }
     ];
 
     let dealCounter = 1;
@@ -168,22 +168,22 @@ const generateAnnualDeals = (): Deal[] => {
             let confidence = template.confidence as Confidence;
             let probability = 50;
             
-            if (closeDate < now && stage !== "CLOSED_WON" && stage !== "CLOSED_LOST") {
+            if (closeDate < now && stage !== "WON" && stage !== "LOST") {
                 // Past deals should be closed or very late
                  if (Math.random() > 0.7) {
-                     stage = "CLOSED_WON";
+                     stage = "WON";
                      probability = 100;
                  } else if (Math.random() > 0.5) {
-                     stage = "CLOSED_LOST";
+                     stage = "LOST";
                      probability = 0;
                  }
             }
             
-            if (stage === "CLOSED_WON") probability = 100;
-            if (stage === "CLOSED_LOST") probability = 0;
-            if (stage === "NEGOTIATION") probability = 90;
-            if (stage === "PROPOSAL") probability = 60;
-            if (stage === "DISCOVERY") probability = 20;
+            if (stage === "WON") probability = 100;
+            if (stage === "LOST") probability = 0;
+            if (stage === "COMMITTED") probability = 90;
+            if (stage === "UNCOMMITTED") probability = 60;
+            if (stage === "LEAD") probability = 20;
 
             deals.push({
                 id: `deal-gen-${dealCounter++}`,
@@ -225,7 +225,7 @@ const generateAnnualDeals = (): Deal[] => {
                 title: `${forceAccount.name} - Upside Opportunity`,
                 amount: 150000 + Math.floor(Math.random() * 100000),
                 currency: "USD",
-                stage: "DISCOVERY",
+                stage: "UNCOMMITTED",
                 confidence: "LOW",
                 closeDate: addDays(month, 15).toISOString(),
                 lastActivityDate: subDays(now, 5).toISOString(),
@@ -246,7 +246,7 @@ const generateAnnualDeals = (): Deal[] => {
                 title: `${forceAccount.name} - Committed Renewal`,
                 amount: 200000 + Math.floor(Math.random() * 100000),
                 currency: "USD",
-                stage: "NEGOTIATION",
+                stage: "COMMITTED",
                 confidence: "HIGH",
                 closeDate: addDays(month, 20).toISOString(),
                 lastActivityDate: subDays(now, 2).toISOString(),
@@ -267,7 +267,7 @@ const generateAnnualDeals = (): Deal[] => {
                 title: `${forceAccount.name} - Strategic Win`,
                 amount: 100000 + Math.floor(Math.random() * 50000),
                 currency: "USD",
-                stage: "CLOSED_WON",
+                stage: "WON",
                 confidence: "HIGH",
                 closeDate: addDays(month, 10).toISOString(),
                 lastActivityDate: subDays(now, 15).toISOString(),
@@ -295,7 +295,7 @@ const DEALS: Deal[] = [
     title: "Q3 Fleet Expansion (Manual)",
     amount: 450000,
     currency: "USD",
-    stage: "NEGOTIATION",
+    stage: "COMMITTED",
     confidence: "HIGH",
     closeDate: addDays(new Date(), 10).toISOString(),
     lastActivityDate: subDays(new Date(), 2).toISOString(),
