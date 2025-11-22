@@ -54,7 +54,10 @@ export default function Dashboard() {
 
   // Calculate metrics based on selected month using memoization for performance
   const metrics = useMemo(() => {
-    const targetDate = new Date(selectedMonth + "-01"); // Append day to make it parseable
+    // We construct the date safely by appending a time component to avoid timezone shifts
+    // "2025-11-01" can be interpreted as UTC midnight, which is previous day in PST.
+    // "2025-11-01T12:00:00" is safer as it lands in the middle of the day.
+    const targetDate = new Date(selectedMonth + "-01T12:00:00");
     return calculateForecast(deals, targetDate, history);
   }, [deals, selectedMonth, history]);
 
@@ -212,7 +215,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold text-green-700">{formatCurrency(metrics.closedWon)}</div>
-            <p className="text-sm text-green-600/80 mt-1">Realized revenue for {format(new Date(selectedMonth + "-01"), 'MMMM')}</p>
+            <p className="text-sm text-green-600/80 mt-1">Realized revenue for {format(new Date(selectedMonth + "-01T12:00:00"), 'MMMM')}</p>
              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <Tooltip>
                 <TooltipTrigger>
@@ -251,8 +254,8 @@ export default function Dashboard() {
         {/* Chart: Pipeline Composition */}
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Forecast Composition ({format(new Date(selectedMonth + "-01"), 'MMMM yyyy')})</CardTitle>
-            <CardDescription>Breakdown of Committed, Uncommitted, and Leads for {format(new Date(selectedMonth + "-01"), 'MMMM yyyy')}</CardDescription>
+            <CardTitle>Forecast Composition ({format(new Date(selectedMonth + "-01T12:00:00"), 'MMMM yyyy')})</CardTitle>
+            <CardDescription>Breakdown of Committed, Uncommitted, and Leads for {format(new Date(selectedMonth + "-01T12:00:00"), 'MMMM yyyy')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
